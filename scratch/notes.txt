@@ -21,3 +21,31 @@
 /ms info <name>
 /ms rename <name> <new-name>
 
+
+
+Templates contain:
+    * Permissioned items for Admins, Owners and perhaps Moderators
+    * Tags
+    * Server Type
+
+-------------------
+server type:
+    paper
+    tuinity
+    spigot
+    vanilla
+
+Each type has its own configuration options and could download the correct type for the template
+
+
+Entities:
+    * Templates
+    * Template Types
+    * Instance
+    * Permission Group
+
+-------------------------
+Template Example
+-------------------------
+
+name: My Template Name

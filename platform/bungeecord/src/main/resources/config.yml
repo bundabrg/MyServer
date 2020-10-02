@@ -1,0 +1,10 @@
+# Don't touch
+version: 1
+
+# Dynamic Ports
+ports:
+  # Start of Dynamic Ports
+  start: 26000
+
+  # How many ports to reserve
+  amount: 1000
