@@ -22,29 +22,26 @@
  * SOFTWARE.
  */
 
-package au.com.grieve.myserver.platform.bungeecord;
+package au.com.grieve.myserver.exceptions;
 
-import au.com.grieve.bcf.platform.bungeecord.BungeeCommandManager;
-import au.com.grieve.myserver.platform.bungeecord.commands.MyServerCommand;
-import lombok.Getter;
-import net.md_5.bungee.api.plugin.Plugin;
-
-public class MyServerBungeePlugin extends Plugin {
-    @Getter
-    private BungeeCommandManager bcf;
-
-    @Override
-    public void onEnable() {
-        super.onEnable();
-
-        bcf = new BungeeCommandManager(this);
-
-        // Register Commands
-        bcf.registerCommand(MyServerCommand.class);
+public class InvalidServerException extends ServerException {
+    public InvalidServerException() {
+        super();
     }
 
-    @Override
-    public void onDisable() {
-        super.onDisable();
+    public InvalidServerException(String message) {
+        super(message);
+    }
+
+    public InvalidServerException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public InvalidServerException(Throwable cause) {
+        super(cause);
+    }
+
+    protected InvalidServerException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
     }
 }

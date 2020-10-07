@@ -2,7 +2,6 @@
     Server name created. To join type /ms join <name>
 /ms list - List all servers I have access to
 /ms join <name> - Join a server I have access to
-/ms template list - List all templates I have access to
 
 /ms destroy <name> - Delete a server
 /ms grant <name> <username> - Grant username access to server. * means all users,
@@ -10,16 +9,29 @@
 
 
 --- admin ---
-/ms reload
-/ms tag <name> set <variable> [<value>]
+/msa - Open Webview
+/msa create server-name template-name - Create a server using the named template
+
+/msa template list - List all templates I have access to
+/msa template info <name> - Provides more details about template
+
+/msa server list - List all servers I have access to
+/msa server info <name> - Provides more details about the server
+/msa server edit <name>
+
+
+/msa reload - Reload Config files
+
+/msa tag <name> set <variable> [<value>]
     tag global set <variable> [<value>] - Set global variable
-/ms auto <name> start <on_start_condition> [data]
+
+/msa auto <name> start <on_start_condition> [data]
                 stop <on_stop_condition> [data]
-/ms start <name>
-/ms stop <name>
-/ms cmd <name> <cmd>
-/ms info <name>
-/ms rename <name> <new-name>
+/msa start <name>
+/msa stop <name>
+/msa cmd <name> <cmd>
+/msa info <name>
+/msa rename <name> <new-name>
 
 
 

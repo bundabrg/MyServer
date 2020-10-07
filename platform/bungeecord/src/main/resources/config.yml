@@ -1,10 +1,22 @@
 # Don't touch
 version: 1
 
-# Dynamic Ports
-ports:
+folder:
+  # Root template folder
+  templates: templates
+
+  # Cache folder
+  cache: cache
+
+  # Servers folder
+  instances: servers
+
+# Server Config
+bungeecord:
+  ip-listen: 127.0.0.1
+
   # Start of Dynamic Ports
-  start: 26000
+  port-start: 26000
 
   # How many ports to reserve
-  amount: 1000
+  port-amount: 1000

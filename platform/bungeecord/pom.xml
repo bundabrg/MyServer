@@ -63,6 +63,18 @@
             <version>1.3.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>au.com.grieve.myserver</groupId>
+            <artifactId>common</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+            <version>2.9.8</version>
+            <scope>compile</scope>
+        </dependency>
 
     </dependencies>
 
