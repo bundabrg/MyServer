@@ -22,34 +22,27 @@
  * SOFTWARE.
  */
 
-package au.com.grieve.myserver;
+package au.com.grieve.myserver.templates.definition;
 
-import au.com.grieve.myserver.api.BaseConfig;
+import au.com.grieve.myserver.TemplateManager;
+import au.com.grieve.myserver.exceptions.InvalidTemplateException;
+import au.com.grieve.myserver.exceptions.NoSuchTemplateException;
+import au.com.grieve.myserver.templates.Template;
 import lombok.Getter;
+import lombok.ToString;
 
+import java.io.IOException;
+import java.nio.file.Path;
 
 /**
- * Main Server Manager
+ * A template that simply contains a list of its config and is used to to inherit from
  */
 @Getter
-public abstract class MyServer {
-    private final BaseConfig config;
-    private final TemplateManager templateManager;
-    private final ServerManager serverManager;
+@ToString
+public class DefinitionTemplate extends Template {
 
-    public MyServer(BaseConfig config) {
-        this.config = config;
-        this.templateManager = createTemplateManager();
-        this.serverManager = createServerManager();
+
+    public DefinitionTemplate(TemplateManager templateManager, Path templatePath) throws NoSuchTemplateException, InvalidTemplateException, IOException {
+        super(templateManager, templatePath);
     }
-
-    protected TemplateManager createTemplateManager() {
-        return new TemplateManager(this);
-    }
-
-    protected ServerManager createServerManager() {
-        return new ServerManager(this);
-    }
-
-
 }

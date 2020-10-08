@@ -22,34 +22,14 @@
  * SOFTWARE.
  */
 
-package au.com.grieve.myserver;
+package au.com.grieve.myserver.platform.bungeecord;
 
-import au.com.grieve.myserver.api.BaseConfig;
-import lombok.Getter;
+import au.com.grieve.myserver.MyServer;
+import au.com.grieve.myserver.ServerManager;
 
-
-/**
- * Main Server Manager
- */
-@Getter
-public abstract class MyServer {
-    private final BaseConfig config;
-    private final TemplateManager templateManager;
-    private final ServerManager serverManager;
-
-    public MyServer(BaseConfig config) {
-        this.config = config;
-        this.templateManager = createTemplateManager();
-        this.serverManager = createServerManager();
+public class BungeeServerManager extends ServerManager {
+    public BungeeServerManager(MyServer myServer) {
+        super(myServer);
     }
-
-    protected TemplateManager createTemplateManager() {
-        return new TemplateManager(this);
-    }
-
-    protected ServerManager createServerManager() {
-        return new ServerManager(this);
-    }
-
 
 }

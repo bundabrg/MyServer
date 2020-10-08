@@ -28,11 +28,10 @@ import au.com.grieve.bcf.annotations.Arg;
 import au.com.grieve.bcf.annotations.Command;
 import au.com.grieve.myserver.platform.bungeecord.BungeeBridge;
 import au.com.grieve.myserver.platform.bungeecord.BungeePlugin;
-import au.com.grieve.myserver.template.server.ServerTemplate;
+import au.com.grieve.myserver.templates.server.ServerTemplate;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 @Command("msat")
 @Arg("template|t")
@@ -50,28 +49,19 @@ public class AdminTemplateCommand extends MyServerCommand {
     public void onTemplateList(CommandSender sender) {
         ComponentBuilder cb = new ComponentBuilder();
 
-        if (!(sender instanceof ProxiedPlayer)) {
-            cb.append("\n");
-        }
-
         cb.append("========= [ Templates ] =========").color(ChatColor.AQUA);
 
         for (ServerTemplate template : BungeePlugin.INSTANCE.getMyServer().getTemplateManager().getTemplates(ServerTemplate.class)) {
-            cb
-                    .append("\n")
-                    .append(template.getName()).color(ChatColor.WHITE);
+            cb.append("\n").append(template.getName()).color(ChatColor.WHITE);
         }
 
-        cb
-                .append("\n")
-                .append("=================================").color(ChatColor.AQUA);
-
-        sender.sendMessage(cb.create());
+        cb.append("\n=================================").color(ChatColor.AQUA);
+        sendMessage(sender, cb.create());
     }
 
     @Arg("info @MSTemplate(filter=server)")
     public void onTemplateInfo(CommandSender sender, BungeeBridge template) {
-        sender.sendMessage(template.bungeeGetInfo());
+        sendMessage(sender, template.bungeeGetInfo());
     }
 
 }

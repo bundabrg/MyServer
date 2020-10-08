@@ -24,62 +24,34 @@
 
 package au.com.grieve.myserver.api;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Builder
 @Getter
 @ToString
-public class Tag {
+public class TagDefinition {
+    private final String name;
     private final String description;
     private final TypeEnum type;
-    private final Object defaultValue;
+    private final String defaultValue;
     private final String permission;
     private final List<String> choices = new ArrayList<>();
-
-    public Tag(JsonNode node) {
-        description = node.has("description") ? node.get("description").asText() : "";
-        type = node.has("type") ? TypeEnum.valueOf(node.get("type").asText().toUpperCase()) : TypeEnum.STRING;
-        defaultValue = parseNode(node.get("default"));
-        permission = node.has("permission") ? node.get("permission").asText() : "";
-        if (node.has("choice")) {
-            for (JsonNode choice : node.get("choice")) {
-                choices.add(choice.asText());
-            }
-        }
-    }
-
-    public Object parseNode(JsonNode node) {
-        return parseNode(node, null);
-    }
-
-    /**
-     * Read the value from a JsonNode
-     *
-     * @param node Data node
-     * @return Object returned data
-     */
-    public Object parseNode(JsonNode node, Object defaultValue) {
-        if (node == null) {
-            return defaultValue;
-        }
-
-        switch (type) {
-            case STRING:
-                return node.asText();
-            case INT:
-                return node.asInt();
-            case BOOLEAN:
-                return node.asBoolean();
-            case CHOICE:
-                String result = node.asText();
-                return choices.contains(result) ? result : null;
-            default:
-                return null;
-        }
-
-    }
+//
+//    public TagDefinition(String name) {
+//        this.name = name;
+//        description = node.has("description") ? node.get("description").asText() : "";
+//        type = node.has("type") ? TypeEnum.valueOf(node.get("type").asText().toUpperCase()) : TypeEnum.STRING;
+//        defaultValue = node.get("default").asText();
+//        permission = node.has("permission") ? node.get("permission").asText() : "";
+//        if (node.has("choice")) {
+//            for (JsonNode choice : node.get("choice")) {
+//                choices.add(choice.asText());
+//            }
+//        }
+//    }
 }

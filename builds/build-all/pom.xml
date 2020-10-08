@@ -55,6 +55,7 @@
                                     <include>au.com.grieve.myserver:*</include>
                                     <include>au.com.grieve.bcf:*</include>
                                     <include>com.fasterxml.jackson.*:*</include>
+                                    <include>commons-io:*</include>
                                 </includes>
                             </artifactSet>
                         </configuration>
@@ -69,6 +70,10 @@
                         <relocation>
                             <pattern>com.fasterxml.jackson</pattern>
                             <shadedPattern>${project.groupId}.${project.artifactId}.shaded.jackson</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>org.apache.commons.io</pattern>
+                            <shadedPattern>${project.groupId}.${project.artifactId}.shaded.apacheio</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>

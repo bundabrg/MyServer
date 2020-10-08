@@ -22,31 +22,25 @@
  * SOFTWARE.
  */
 
-package au.com.grieve.myserver.template.definition;
+package au.com.grieve.myserver.templates.server.vanilla;
 
-import au.com.grieve.myserver.TemplateManager;
-import au.com.grieve.myserver.api.Template;
-import au.com.grieve.myserver.exceptions.InvalidTemplateException;
-import au.com.grieve.myserver.exceptions.NoSuchTemplateException;
-import com.fasterxml.jackson.databind.JsonNode;
+import au.com.grieve.myserver.SimpleTemplater;
+import au.com.grieve.myserver.templates.server.BaseServer;
 import lombok.Getter;
-import lombok.ToString;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
-import java.io.IOException;
-
-/**
- * A template that simply contains a list of its config and is used to to inherit from
- */
 @Getter
-@ToString
-public class DefinitionTemplate extends Template {
+@Setter
+@SuperBuilder
+public class VanillaServer extends BaseServer {
+    private String serverIp;
+    private Integer serverPort;
 
-    /**
-     * Load Template from a JsonNode
-     *
-     * @param node root JsonNode
-     */
-    public DefinitionTemplate(TemplateManager templateManager, JsonNode node) throws NoSuchTemplateException, InvalidTemplateException, IOException {
-        super(templateManager, node);
+    @Override
+    protected SimpleTemplater createTemplater() {
+        return super.createTemplater()
+                .register("MC_SERVER_IP", serverIp != null ? serverIp : "invalid")
+                .register("MC_SERVER_PORT", serverPort != null ? serverPort.toString() : "invalid");
     }
 }

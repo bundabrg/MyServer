@@ -27,12 +27,15 @@ package au.com.grieve.myserver.platform.bungeecord.commands;
 import au.com.grieve.bcf.annotations.Arg;
 import au.com.grieve.bcf.annotations.Command;
 import au.com.grieve.myserver.api.Server;
+import au.com.grieve.myserver.exceptions.InvalidServerException;
 import au.com.grieve.myserver.platform.bungeecord.BungeeBridge;
 import au.com.grieve.myserver.platform.bungeecord.BungeePlugin;
-import au.com.grieve.myserver.template.server.ServerTemplate;
+import au.com.grieve.myserver.templates.server.ServerTemplate;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+
+import java.io.IOException;
 
 @Command("msas")
 @Arg("server|s")
@@ -48,24 +51,31 @@ public class AdminServerCommand extends AdminCommand {
 
     @Arg("list|l")
     public void onServerList(CommandSender sender) {
-        StringBuilder sb = new StringBuilder();
+        ComponentBuilder cb = new ComponentBuilder();
+
+        cb.append("========= [ Servers ] =========").color(ChatColor.AQUA);
+
         for (Server server : BungeePlugin.INSTANCE.getMyServer().getServerManager().getServers()) {
-            sb.append(server.getName()).append("\n");
+            cb.append("\n").append(server.getName()).color(ChatColor.WHITE);
         }
 
-        sender.sendMessage(
-                new ComponentBuilder(sb.toString()).create()
-        );
+        cb.append("\n=================================").color(ChatColor.AQUA);
+        sendMessage(sender, cb.create());
     }
 
     @Arg("create|c @string @MSTemplate(filter=server)")
     public void onCreate(CommandSender sender, String name, ServerTemplate template) {
-
+        try {
+            Server server = template.createServer(name);
+            sendMessage(sender, new ComponentBuilder("Created Server: " + name).color(ChatColor.AQUA).create());
+        } catch (InvalidServerException | IOException e) {
+            sendMessage(sender, new ComponentBuilder(e.getMessage()).color(ChatColor.RED).create());
+        }
     }
 
     @Arg("info @MSServer")
     public void onServerInfo(CommandSender sender, BungeeBridge server) {
-        sender.sendMessage(server.bungeeGetInfo());
+        sendMessage(sender, server.bungeeGetInfo());
     }
 
 }

@@ -22,20 +22,24 @@
  * SOFTWARE.
  */
 
-package au.com.grieve.myserver.template.server.vanilla;
+package au.com.grieve.myserver.templates.server.vanilla;
 
 import au.com.grieve.myserver.TemplateManager;
 import au.com.grieve.myserver.api.Server;
 import au.com.grieve.myserver.exceptions.InvalidServerException;
 import au.com.grieve.myserver.exceptions.InvalidTemplateException;
 import au.com.grieve.myserver.exceptions.NoSuchTemplateException;
-import au.com.grieve.myserver.template.server.ServerTemplate;
+import au.com.grieve.myserver.templates.server.ServerTemplate;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
 import lombok.Getter;
 import lombok.ToString;
+import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.UUID;
 
 /**
  * A Vanilla Server Template
@@ -50,10 +54,10 @@ public class VanillaServerTemplate extends ServerTemplate {
     /**
      * Load Server Template from a JsonNode
      *
-     * @param rootNode The root json node
+     * @param templatePath The template path
      */
-    public VanillaServerTemplate(TemplateManager templateManager, JsonNode rootNode) throws NoSuchTemplateException, InvalidTemplateException, IOException {
-        super(templateManager, rootNode);
+    public VanillaServerTemplate(TemplateManager templateManager, Path templatePath) throws NoSuchTemplateException, InvalidTemplateException, IOException {
+        super(templateManager, templatePath);
 
         server = new ServerSection();
 
@@ -72,13 +76,49 @@ public class VanillaServerTemplate extends ServerTemplate {
     }
 
     @Override
-    public VanillaServer createServer(String instanceName) {
-        return null;
+    public VanillaServer createServer(String name) throws InvalidServerException, IOException {
+        // Check that name is valid
+        if (name.isEmpty() || !name.matches("[0-9a-zA-Z-.]+")) {
+            throw new InvalidServerException("Invalid Name. Must only contains a-zA-Z0-9.-");
+        }
+
+        // Does Server Exist?
+        if (getTemplateManager().getMyServer().getServerManager().hasServer(name)) {
+            throw new InvalidServerException("Server " + name + " already exists");
+        }
+
+        // Check path of server does not exists
+        Path serverPath = getTemplateManager().getMyServer().getConfig().getFolderConfig().getServersPath().resolve(name);
+        if (Files.exists(serverPath)) {
+            throw new InvalidServerException("The path '" + serverPath + "' already exists!");
+        }
+
+        // Create path and copy all files
+        Files.createDirectories(serverPath);
+        FileUtils.copyDirectory(getTemplatePath().resolve("files").toFile(), serverPath.resolve("files").toFile());
+
+        // Create the server
+        VanillaServer server = VanillaServer.builder()
+                .template(this)
+                .serverPath(serverPath)
+                .name(name)
+                .uuid(UUID.randomUUID())
+                .build();
+
+        // Save server settings
+        server.save();
+        server.updateFiles(TemplateFileEnum.STATIC);
+
+        return server;
     }
 
     @Override
-    public Server loadServer(JsonNode node) throws InvalidServerException {
-        return new VanillaServer(this, node);
+    public Server loadServer(Path serverPath) throws InvalidServerException, IOException {
+        return VanillaServer.builder()
+                .template(this)
+                .serverPath(serverPath)
+                .build()
+                .load();
     }
 
     @Data

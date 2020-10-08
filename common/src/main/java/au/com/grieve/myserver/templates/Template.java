@@ -22,30 +22,37 @@
  * SOFTWARE.
  */
 
-package au.com.grieve.myserver.api;
+package au.com.grieve.myserver.templates;
 
 import au.com.grieve.myserver.TemplateManager;
 import au.com.grieve.myserver.exceptions.InvalidTemplateException;
 import au.com.grieve.myserver.exceptions.NoSuchTemplateException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.Getter;
 import lombok.ToString;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @ToString
 public abstract class Template {
+    public static ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
+
     private final TemplateManager templateManager;
+    private final Path templatePath;
     private final JsonNode node;
     private final String name;
     private final List<Template> parents = new ArrayList<>();
 
-    public Template(TemplateManager templateManager, JsonNode node) throws NoSuchTemplateException, InvalidTemplateException, IOException {
+    public Template(TemplateManager templateManager, Path templatePath) throws NoSuchTemplateException, InvalidTemplateException, IOException {
         this.templateManager = templateManager;
-        this.node = node;
+        this.templatePath = templatePath;
+        this.node = MAPPER.readTree(templatePath.resolve("template.yml").toFile());
         this.name = node.get("name").asText();
         if (node.has("parents")) {
             for (JsonNode n : node.get("parents")) {

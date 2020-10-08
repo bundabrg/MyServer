@@ -24,6 +24,10 @@
 
 package au.com.grieve.myserver.api;
 
+import au.com.grieve.myserver.exceptions.InvalidServerException;
+import au.com.grieve.myserver.templates.Template;
+
+import java.io.IOException;
 import java.util.UUID;
 
 public interface Server {
@@ -40,4 +44,19 @@ public interface Server {
      * @return server name
      */
     String getName();
+
+    /**
+     * Save Server
+     */
+    Server save() throws IOException;
+
+    /**
+     * Load Server
+     */
+    Server load() throws InvalidServerException, IOException;
+
+    /**
+     * Get Server Template
+     */
+    Template getTemplate();
 }

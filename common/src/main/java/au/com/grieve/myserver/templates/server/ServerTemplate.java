@@ -22,59 +22,45 @@
  * SOFTWARE.
  */
 
-package au.com.grieve.myserver.template.server;
+package au.com.grieve.myserver.templates.server;
 
 import au.com.grieve.myserver.TemplateManager;
 import au.com.grieve.myserver.api.Server;
-import au.com.grieve.myserver.api.Tag;
-import au.com.grieve.myserver.api.Template;
 import au.com.grieve.myserver.exceptions.InvalidServerException;
 import au.com.grieve.myserver.exceptions.InvalidTemplateException;
 import au.com.grieve.myserver.exceptions.NoSuchTemplateException;
-import com.fasterxml.jackson.databind.JsonNode;
+import au.com.grieve.myserver.templates.TagsTemplate;
 import lombok.Getter;
 import lombok.ToString;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.nio.file.Path;
 
 /**
  * A template for a server
  */
 @Getter
 @ToString(callSuper = true)
-public abstract class ServerTemplate extends Template {
-    private final Map<String, Tag> tags = new HashMap<>();
+public abstract class ServerTemplate extends TagsTemplate {
 
     /**
      * Load Template from a JsonNode
      *
-     * @param node root JsonNode
+     * @param templatePath template path
      */
-    public ServerTemplate(TemplateManager templateManager, JsonNode node) throws NoSuchTemplateException, InvalidTemplateException, IOException {
-        super(templateManager, node);
-
-        for (JsonNode n : getAllNodes()) {
-            if (n.has("tags")) {
-                for (Iterator<Map.Entry<String, JsonNode>> it = n.get("tags").fields(); it.hasNext(); ) {
-                    Map.Entry<String, JsonNode> entry = it.next();
-                    tags.putIfAbsent(entry.getKey(), new Tag(entry.getValue()));
-                }
-            }
-        }
+    public ServerTemplate(TemplateManager templateManager, Path templatePath) throws NoSuchTemplateException, InvalidTemplateException, IOException {
+        super(templateManager, templatePath);
     }
 
     /**
      * Create new Server from this template
      */
-    public abstract Server createServer(String instanceName);
+    public abstract Server createServer(String name) throws InvalidServerException, IOException;
 
     /**
      * Load Server from stream
      */
-    public abstract Server loadServer(JsonNode node) throws InvalidServerException;
+    public abstract Server loadServer(Path serverPath) throws InvalidServerException, IOException;
 
 
 }

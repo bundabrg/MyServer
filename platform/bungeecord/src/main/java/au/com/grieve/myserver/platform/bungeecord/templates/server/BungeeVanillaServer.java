@@ -22,13 +22,11 @@
  * SOFTWARE.
  */
 
-package au.com.grieve.myserver.platform.bungeecord.template.server;
+package au.com.grieve.myserver.platform.bungeecord.templates.server;
 
-import au.com.grieve.myserver.exceptions.InvalidServerException;
 import au.com.grieve.myserver.platform.bungeecord.BungeeBridge;
-import au.com.grieve.myserver.template.server.vanilla.VanillaServer;
-import au.com.grieve.myserver.template.server.vanilla.VanillaServerTemplate;
-import com.fasterxml.jackson.databind.JsonNode;
+import au.com.grieve.myserver.templates.server.vanilla.VanillaServer;
+import lombok.experimental.SuperBuilder;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -36,29 +34,32 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import java.util.List;
 import java.util.Map;
 
+@SuperBuilder
 public class BungeeVanillaServer extends VanillaServer implements BungeeBridge {
-    protected BungeeVanillaServer(VanillaServerTemplate template, JsonNode node) throws InvalidServerException {
-        super(template, node);
-    }
+
+//    @Builder
+//    public BungeeVanillaServer(VanillaServerTemplate template, Path serverPath, UUID uuid, Map<String, List<String>> permissions, Map<String, Object> tags, String name) {
+//        super(template, serverPath, uuid, permissions, tags, name);
+//    }
 
     @Override
     public BaseComponent[] bungeeGetInfo() {
         ComponentBuilder cb = new ComponentBuilder()
-                .append("Name: ").color(ChatColor.YELLOW).append(getName()).color(ChatColor.WHITE).append("\n")
-                .append("Template: ").color(ChatColor.YELLOW).append(getTemplate().getName()).color(ChatColor.WHITE).append("\n")
-                .append("UUID: ").color(ChatColor.YELLOW).append(getUuid().toString()).color(ChatColor.WHITE).append("\n")
-                .append("Permissions: ").color(ChatColor.YELLOW).append("\n");
+                .append("Name: ").color(ChatColor.YELLOW).append(getName()).color(ChatColor.WHITE)
+                .append("\nTemplate: ").color(ChatColor.YELLOW).append(getTemplate().getName()).color(ChatColor.WHITE)
+                .append("\nUUID: ").color(ChatColor.YELLOW).append(getUuid().toString()).color(ChatColor.WHITE)
+                .append("\nPermissions: ").color(ChatColor.YELLOW);
 
         for (Map.Entry<String, List<String>> entry : getPermissions().entrySet()) {
-            cb.append("  " + entry.getKey() + ":").color(ChatColor.YELLOW);
+            cb.append("\n  " + entry.getKey() + ":").color(ChatColor.YELLOW);
             for (String accountId : entry.getValue()) {
                 cb.append("\n").append("    - " + accountId).color(ChatColor.WHITE);
             }
         }
 
         cb.append("\nTags: ").color(ChatColor.YELLOW);
-        for (Map.Entry<String, Object> entry : getTags().entrySet()) {
-            cb.append("\n  " + entry.getKey() + ":").color(ChatColor.YELLOW).append(entry.getValue().toString()).color(ChatColor.WHITE);
+        for (Map.Entry<String, String> entry : getTags().entrySet()) {
+            cb.append("\n  " + entry.getKey() + ": ").color(ChatColor.YELLOW).append(entry.getValue()).color(ChatColor.WHITE);
         }
 
         return cb.create();

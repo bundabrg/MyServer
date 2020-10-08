@@ -24,9 +24,9 @@
 
 package au.com.grieve.myserver;
 
-import au.com.grieve.myserver.api.Template;
 import au.com.grieve.myserver.exceptions.InvalidTemplateException;
 import au.com.grieve.myserver.exceptions.NoSuchTemplateException;
+import au.com.grieve.myserver.templates.Template;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -217,8 +217,8 @@ public class TemplateManager {
 
         try {
             Template result = registeredTemplateTypes.get(templateSubName)
-                    .getConstructor(TemplateManager.class, JsonNode.class)
-                    .newInstance(this, rootNode);
+                    .getConstructor(TemplateManager.class, Path.class)
+                    .newInstance(this, path);
             templateInstances.put(templateName, result);
             return result;
         } catch (InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {

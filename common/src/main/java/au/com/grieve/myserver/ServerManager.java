@@ -29,7 +29,7 @@ import au.com.grieve.myserver.exceptions.InvalidServerException;
 import au.com.grieve.myserver.exceptions.InvalidTemplateException;
 import au.com.grieve.myserver.exceptions.NoSuchServerException;
 import au.com.grieve.myserver.exceptions.NoSuchTemplateException;
-import au.com.grieve.myserver.template.server.ServerTemplate;
+import au.com.grieve.myserver.templates.server.ServerTemplate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -37,9 +37,7 @@ import com.google.common.collect.MapMaker;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -59,6 +57,22 @@ public class ServerManager {
             .makeMap();
 
     private final MyServer myServer;
+
+    /**
+     * Return true if the server with name exists
+     *
+     * @param name Name of server
+     * @return true if exists
+     */
+    public boolean hasServer(String name) {
+        return getServers().stream()
+                .anyMatch(s -> s.getName().equals(name));
+    }
+
+    public boolean hasServer(UUID uuid) {
+        return getServers().stream()
+                .anyMatch(s -> s.getUuid().equals(uuid));
+    }
 
     public Server getServer(String name) throws NoSuchServerException {
         return getServers().stream()
@@ -90,15 +104,15 @@ public class ServerManager {
             Path lastPath = null;
             for (Path path : walk
                     .filter(Files::isDirectory)
-                    .filter(p -> p.resolve("instance.yml").toFile().exists())
+                    .filter(p -> p.resolve("server.yml").toFile().exists())
                     .collect(Collectors.toList())) {
 
-                // If a template.yml file is found in a directory then prune out all child directories
+                // If a server.yml file is found in a directory then prune out all child directories
                 if (lastPath == null || !path.startsWith(lastPath)) {
                     lastPath = path;
 
                     try {
-                        result.add(loadServer(new FileInputStream(path.resolve("instance.yml").toFile())));
+                        result.add(loadServer(path));
                     } catch (IOException | NoSuchTemplateException | NoSuchServerException | InvalidServerException | InvalidTemplateException e) {
                         e.printStackTrace();
                     }
@@ -114,10 +128,10 @@ public class ServerManager {
     /**
      * Load a server from a stream
      *
-     * @param is inputstream containing server data
+     * @param serverPath Path to server folder
      */
-    public Server loadServer(InputStream is) throws IOException, NoSuchTemplateException, NoSuchServerException, InvalidServerException, InvalidTemplateException {
-        JsonNode rootNode = MAPPER.readTree(is);
+    public Server loadServer(Path serverPath) throws IOException, NoSuchTemplateException, NoSuchServerException, InvalidServerException, InvalidTemplateException {
+        JsonNode rootNode = MAPPER.readTree(serverPath.resolve("server.yml").toFile());
 
         if (!rootNode.has("uuid")) {
             throw new NoSuchServerException("Can't find field 'uuid'");
@@ -139,8 +153,9 @@ public class ServerManager {
 
         ServerTemplate template = getMyServer().getTemplateManager().getTemplate(ServerTemplate.class, templateName);
 
-        Server server = template.loadServer(rootNode);
+        Server server = template.loadServer(serverPath);
         serverInstances.put(uuid, server);
         return server;
     }
+
 }
