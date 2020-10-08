@@ -61,7 +61,7 @@ public class AdminServerCommand extends AdminCommand {
             cb.append("\n").append(server.getName()).color(ChatColor.WHITE);
         }
 
-        cb.append("\n=================================").color(ChatColor.AQUA);
+        cb.append("\n===============================").color(ChatColor.AQUA);
         sendMessage(sender, cb.create());
     }
 
