@@ -32,6 +32,8 @@ import au.com.grieve.myserver.platform.bungeecord.commands.MyServerCommand;
 import au.com.grieve.myserver.platform.bungeecord.config.BungeeConfig;
 import au.com.grieve.myserver.platform.bungeecord.config.YamlBungeeConfig;
 import au.com.grieve.myserver.platform.bungeecord.parsers.MSServer;
+import au.com.grieve.myserver.platform.bungeecord.parsers.MSTagDefinition;
+import au.com.grieve.myserver.platform.bungeecord.parsers.MSTagValue;
 import au.com.grieve.myserver.platform.bungeecord.parsers.MSTemplate;
 import lombok.Getter;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -71,6 +73,8 @@ public class BungeePlugin extends Plugin {
         // Register Parsers
         bcf.registerParser("MSTemplate", MSTemplate.class);
         bcf.registerParser("MSServer", MSServer.class);
+        bcf.registerParser("MSTagDefinition", MSTagDefinition.class);
+        bcf.registerParser("MSTagValue", MSTagValue.class);
 
         // Register Server Manager
         myServer = new BungeeMyServer(config, this);

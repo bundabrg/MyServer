@@ -59,4 +59,9 @@ public interface Server {
      * Get Server Template
      */
     Template getTemplate();
+
+    /**
+     * Destroy a Server
+     */
+    void destroy() throws IOException;
 }

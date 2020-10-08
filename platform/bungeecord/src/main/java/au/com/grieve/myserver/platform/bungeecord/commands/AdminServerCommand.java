@@ -27,9 +27,11 @@ package au.com.grieve.myserver.platform.bungeecord.commands;
 import au.com.grieve.bcf.annotations.Arg;
 import au.com.grieve.bcf.annotations.Command;
 import au.com.grieve.myserver.api.Server;
+import au.com.grieve.myserver.api.TagDefinition;
 import au.com.grieve.myserver.exceptions.InvalidServerException;
 import au.com.grieve.myserver.platform.bungeecord.BungeeBridge;
 import au.com.grieve.myserver.platform.bungeecord.BungeePlugin;
+import au.com.grieve.myserver.templates.server.BaseServer;
 import au.com.grieve.myserver.templates.server.ServerTemplate;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
@@ -49,7 +51,7 @@ public class AdminServerCommand extends AdminCommand {
         );
     }
 
-    @Arg("list|l")
+    @Arg("list")
     public void onServerList(CommandSender sender) {
         ComponentBuilder cb = new ComponentBuilder();
 
@@ -63,7 +65,7 @@ public class AdminServerCommand extends AdminCommand {
         sendMessage(sender, cb.create());
     }
 
-    @Arg("create|c @string @MSTemplate(filter=server)")
+    @Arg("create @string @MSTemplate(filter=server)")
     public void onCreate(CommandSender sender, String name, ServerTemplate template) {
         try {
             Server server = template.createServer(name);
@@ -73,9 +75,41 @@ public class AdminServerCommand extends AdminCommand {
         }
     }
 
+    @Arg("destroy @MSServer")
+    public void onDestroy(CommandSender sender, Server server) {
+        try {
+            server.destroy();
+            sendMessage(sender, new ComponentBuilder("Destroyed Server: " + server.getName()).create());
+        } catch (IOException e) {
+            sendMessage(sender, new ComponentBuilder(e.getMessage()).color(ChatColor.RED).create());
+        }
+    }
+
     @Arg("info @MSServer")
     public void onServerInfo(CommandSender sender, BungeeBridge server) {
         sendMessage(sender, server.bungeeGetInfo());
     }
 
+    @Arg("edit @MSServer tag set @MSTagDefinition @MSTagValue")
+    public void onServerTagsSet(CommandSender sender, BaseServer server, TagDefinition definition, String value) {
+        server.setTag(definition.getName(), value);
+        sendMessage(sender, new ComponentBuilder("Set Tag: ").color(ChatColor.AQUA)
+                .append(definition.getName()).color(ChatColor.WHITE)
+                .append(" = ").color(ChatColor.AQUA)
+                .append(value).color(ChatColor.WHITE)
+                .create()
+        );
+    }
+
+    @Arg("edit @MSServer tag reset @MSTagDefinition")
+    public void onServerTagsClear(CommandSender sender, BaseServer server, TagDefinition definition) {
+        server.resetTag(definition.getName());
+        sendMessage(sender, new ComponentBuilder("Reset Tag: ").color(ChatColor.AQUA)
+                .append(definition.getName()).color(ChatColor.WHITE)
+                .append(" = ").color(ChatColor.AQUA)
+                .append(definition.getDefaultValue()).color(ChatColor.WHITE)
+                .append(" (Default Value)").color(ChatColor.YELLOW)
+                .create()
+        );
+    }
 }

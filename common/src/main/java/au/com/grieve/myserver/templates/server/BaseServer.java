@@ -38,6 +38,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.apache.commons.io.FileUtils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -176,6 +177,28 @@ public abstract class BaseServer implements Server {
 
     public void setTag(String name, String value) {
         tags.put(name, value);
+        try {
+            save();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        updateFiles(TagsTemplate.TemplateFileEnum.DYNAMIC);
+    }
+
+    /**
+     * Remove local value for tag
+     *
+     * @param name Name of tag
+     */
+    public void resetTag(String name) {
+        if (tags.remove(name) != null) {
+            try {
+                save();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            updateFiles(TagsTemplate.TemplateFileEnum.DYNAMIC);
+        }
     }
 
     /**
@@ -200,5 +223,10 @@ public abstract class BaseServer implements Server {
         return new SimpleTemplater()
                 .register(getAllTags())
                 .register("DATE_GENERATED", dtf.format(LocalDateTime.now()));
+    }
+
+    @Override
+    public void destroy() throws IOException {
+        FileUtils.deleteDirectory(getServerPath().toFile());
     }
 }

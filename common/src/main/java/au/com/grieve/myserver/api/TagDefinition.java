@@ -29,6 +29,7 @@ import lombok.Getter;
 import lombok.ToString;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Builder
@@ -41,17 +42,46 @@ public class TagDefinition {
     private final String defaultValue;
     private final String permission;
     private final List<String> choices = new ArrayList<>();
-//
-//    public TagDefinition(String name) {
-//        this.name = name;
-//        description = node.has("description") ? node.get("description").asText() : "";
-//        type = node.has("type") ? TypeEnum.valueOf(node.get("type").asText().toUpperCase()) : TypeEnum.STRING;
-//        defaultValue = node.get("default").asText();
-//        permission = node.has("permission") ? node.get("permission").asText() : "";
-//        if (node.has("choice")) {
-//            for (JsonNode choice : node.get("choice")) {
-//                choices.add(choice.asText());
-//            }
-//        }
-//    }
+
+    /**
+     * Validate that input matches our rules
+     *
+     * @param input The input to check
+     * @return true if it is valid input
+     */
+    public boolean validate(String input) {
+        switch (type) {
+            case NULL:
+                return false;
+            case STRING:
+                return true;
+            case INT:
+                try {
+                    Integer.valueOf(input);
+                    return true;
+                } catch (NumberFormatException e) {
+                    return false;
+                }
+            case BOOLEAN:
+                return (input.equalsIgnoreCase("true") || input.equalsIgnoreCase("false"));
+            case CHOICE:
+                return choices.stream()
+                        .anyMatch(c -> c.equalsIgnoreCase(input));
+        }
+        return false;
+    }
+
+    public List<String> options() {
+        switch (type) {
+            case BOOLEAN:
+                List<String> result = new ArrayList<>();
+                result.add("true");
+                result.add("false");
+                return result;
+            case CHOICE:
+                return choices;
+        }
+
+        return Collections.emptyList();
+    }
 }

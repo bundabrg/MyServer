@@ -27,40 +27,55 @@ package au.com.grieve.myserver.platform.bungeecord.parsers;
 import au.com.grieve.bcf.ArgNode;
 import au.com.grieve.bcf.CommandContext;
 import au.com.grieve.bcf.CommandManager;
+import au.com.grieve.bcf.Parser;
 import au.com.grieve.bcf.exceptions.ParserInvalidResultException;
 import au.com.grieve.bcf.parsers.SingleParser;
-import au.com.grieve.myserver.api.Server;
-import au.com.grieve.myserver.exceptions.NoSuchServerException;
-import au.com.grieve.myserver.platform.bungeecord.BungeePlugin;
-import au.com.grieve.myserver.templates.server.BaseServer;
+import au.com.grieve.myserver.api.TagDefinition;
+import com.google.common.collect.Lists;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * MyServer Server
+ * MyServer Tag Value
+ * <p>
+ * Relies on a MSTagDefinition being present so we know what values are correct
  */
-public class MSServer extends SingleParser {
+public class MSTagValue extends SingleParser {
 
-    public MSServer(CommandManager manager, ArgNode argNode, CommandContext context) {
+    public MSTagValue(CommandManager manager, ArgNode argNode, CommandContext context) {
         super(manager, argNode, context);
     }
 
-    @Override
-    protected BaseServer result() throws ParserInvalidResultException {
-        try {
-            return (BaseServer) BungeePlugin.INSTANCE.getMyServer().getServerManager().getServer(getInput().toLowerCase());
-        } catch (NoSuchServerException ignored) {
+    protected TagDefinition getTagDefinition() throws ParserInvalidResultException {
+        for (Parser parser : Lists.reverse(context.getParsers())) {
+            if (parser instanceof MSTagDefinition) {
+                return ((MSTagDefinition) parser).result();
+            }
         }
-        throw new ParserInvalidResultException(this, "No such server");
+        throw new ParserInvalidResultException(this, "Unknown Tag");
+    }
+
+    @Override
+    protected String result() throws ParserInvalidResultException {
+        TagDefinition definition = getTagDefinition();
+        if (definition.validate(getInput())) {
+            return getInput();
+        }
+        throw new ParserInvalidResultException(this, "Invalid Value");
     }
 
     @Override
     protected List<String> complete() {
-        return BungeePlugin.INSTANCE.getMyServer().getServerManager().getServers().stream()
-                .map(Server::getName)
-                .filter(s -> s.toLowerCase().startsWith(getInput().toLowerCase()))
-                .limit(20)
-                .collect(Collectors.toList());
+        try {
+            TagDefinition definition = getTagDefinition();
+            return definition.options().stream()
+                    .filter(s -> s.startsWith(getInput()))
+                    .limit(20)
+                    .collect(Collectors.toList());
+        } catch (ParserInvalidResultException e) {
+            return Collections.emptyList();
+        }
     }
 }

@@ -27,40 +27,58 @@ package au.com.grieve.myserver.platform.bungeecord.parsers;
 import au.com.grieve.bcf.ArgNode;
 import au.com.grieve.bcf.CommandContext;
 import au.com.grieve.bcf.CommandManager;
+import au.com.grieve.bcf.Parser;
 import au.com.grieve.bcf.exceptions.ParserInvalidResultException;
 import au.com.grieve.bcf.parsers.SingleParser;
-import au.com.grieve.myserver.api.Server;
-import au.com.grieve.myserver.exceptions.NoSuchServerException;
-import au.com.grieve.myserver.platform.bungeecord.BungeePlugin;
+import au.com.grieve.myserver.api.TagDefinition;
 import au.com.grieve.myserver.templates.server.BaseServer;
+import com.google.common.collect.Lists;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * MyServer Server
+ * MyServer Tag
+ * <p>
+ * Relies on a MSServer previously being set so we know what tags are available
+ * <p>
+ * Returns a TagDefinition
  */
-public class MSServer extends SingleParser {
+public class MSTagDefinition extends SingleParser {
 
-    public MSServer(CommandManager manager, ArgNode argNode, CommandContext context) {
+    public MSTagDefinition(CommandManager manager, ArgNode argNode, CommandContext context) {
         super(manager, argNode, context);
     }
 
-    @Override
-    protected BaseServer result() throws ParserInvalidResultException {
-        try {
-            return (BaseServer) BungeePlugin.INSTANCE.getMyServer().getServerManager().getServer(getInput().toLowerCase());
-        } catch (NoSuchServerException ignored) {
+    protected BaseServer getServer() throws ParserInvalidResultException {
+        for (Parser parser : Lists.reverse(context.getParsers())) {
+            if (parser instanceof MSServer) {
+                return ((MSServer) parser).result();
+            }
         }
-        throw new ParserInvalidResultException(this, "No such server");
+        throw new ParserInvalidResultException(this, "Unknown Server");
+    }
+
+    @Override
+    protected TagDefinition result() throws ParserInvalidResultException {
+        BaseServer server = getServer();
+        if (server.getTemplate().getTags().containsKey(getInput())) {
+            return server.getTemplate().getTags().get(getInput());
+        }
+        throw new ParserInvalidResultException(this, "Invalid Tag");
     }
 
     @Override
     protected List<String> complete() {
-        return BungeePlugin.INSTANCE.getMyServer().getServerManager().getServers().stream()
-                .map(Server::getName)
-                .filter(s -> s.toLowerCase().startsWith(getInput().toLowerCase()))
-                .limit(20)
-                .collect(Collectors.toList());
+        try {
+            BaseServer server = getServer();
+            return server.getTemplate().getTags().keySet().stream()
+                    .filter(s -> s.startsWith(getInput()))
+                    .limit(20)
+                    .collect(Collectors.toList());
+        } catch (ParserInvalidResultException e) {
+            return Collections.emptyList();
+        }
     }
 }
