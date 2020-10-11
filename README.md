@@ -4,7 +4,7 @@
 [![GitHub release](https://img.shields.io/github/release/Bundabrg/MyServer)](https://GitHub.com/Bundabrg/MyServer/releases/)
 [![GitHub commits](https://img.shields.io/github/commits-since/Bundabrg/MyServer/latest)](https://GitHub.com/Bundabrg/MyServer/commit/)
 [![Github all releases](https://img.shields.io/github/downloads/Bundabrg/MyServer/total.svg)](https://GitHub.com/Bundabrg/MyServer/releases/)
-![HitCount](http://hits.dwyl.com/bundabrg/MyServer.svg)
+<!-- ![HitCount](http://hits.dwyl.com/bundabrg/MyServer.svg) -->
 
 ![Workflow](https://github.com/bundabrg/MyServer/workflows/build/badge.svg)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Bundabrg/MyServer/graphs/commit-activity)
