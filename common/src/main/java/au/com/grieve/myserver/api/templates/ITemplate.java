@@ -22,40 +22,26 @@
  * SOFTWARE.
  */
 
-package au.com.grieve.myserver;
+package au.com.grieve.myserver.api.templates;
 
-import au.com.grieve.myserver.api.BaseConfig;
-import au.com.grieve.myserver.api.scheduler.ITaskScheduler;
-import lombok.Getter;
+import au.com.grieve.myserver.TemplateManager;
+import com.fasterxml.jackson.databind.JsonNode;
 
+import java.nio.file.Path;
+import java.util.List;
 
-/**
- * Main Server Manager
- */
-@Getter
-public abstract class MyServer {
-    private final BaseConfig config;
-    private final TemplateManager templateManager;
-    private final ServerManager serverManager;
+public interface ITemplate {
+    List<JsonNode> getAllNodes();
 
-    public MyServer(BaseConfig config) {
-        this.config = config;
-        this.templateManager = createTemplateManager();
-        this.serverManager = createServerManager();
-    }
+    TemplateManager getTemplateManager();
 
-    protected TemplateManager createTemplateManager() {
-        return new TemplateManager(this);
-    }
+    Path getTemplatePath();
 
-    protected ServerManager createServerManager() {
-        return new ServerManager(this);
-    }
+    JsonNode getNode();
 
-    /**
-     * Retrieve a scheduler
-     *
-     * @return a scheduler
-     */
-    public abstract ITaskScheduler getScheduler();
+    String getName();
+
+    String getDescription();
+
+    List<ITemplate> getParents();
 }

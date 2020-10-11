@@ -22,40 +22,30 @@
  * SOFTWARE.
  */
 
-package au.com.grieve.myserver;
+package au.com.grieve.myserver.platform.bungeecord;
 
-import au.com.grieve.myserver.api.BaseConfig;
-import au.com.grieve.myserver.api.scheduler.ITaskScheduler;
+import au.com.grieve.myserver.api.scheduler.IScheduledTask;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
 
-
-/**
- * Main Server Manager
- */
 @Getter
-public abstract class MyServer {
-    private final BaseConfig config;
-    private final TemplateManager templateManager;
-    private final ServerManager serverManager;
+@RequiredArgsConstructor
+public class BungeeScheduledTask implements IScheduledTask {
+    private final ScheduledTask realScheduledTask;
 
-    public MyServer(BaseConfig config) {
-        this.config = config;
-        this.templateManager = createTemplateManager();
-        this.serverManager = createServerManager();
+    @Override
+    public int getId() {
+        return realScheduledTask.getId();
     }
 
-    protected TemplateManager createTemplateManager() {
-        return new TemplateManager(this);
+    @Override
+    public Runnable getTask() {
+        return realScheduledTask.getTask();
     }
 
-    protected ServerManager createServerManager() {
-        return new ServerManager(this);
+    @Override
+    public void cancel() {
+        realScheduledTask.cancel();
     }
-
-    /**
-     * Retrieve a scheduler
-     *
-     * @return a scheduler
-     */
-    public abstract ITaskScheduler getScheduler();
 }

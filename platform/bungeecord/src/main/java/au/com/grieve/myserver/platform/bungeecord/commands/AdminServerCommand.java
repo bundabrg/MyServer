@@ -26,13 +26,12 @@ package au.com.grieve.myserver.platform.bungeecord.commands;
 
 import au.com.grieve.bcf.annotations.Arg;
 import au.com.grieve.bcf.annotations.Command;
-import au.com.grieve.myserver.api.Server;
 import au.com.grieve.myserver.api.TagDefinition;
+import au.com.grieve.myserver.api.templates.server.IServerTemplate;
 import au.com.grieve.myserver.exceptions.InvalidServerException;
-import au.com.grieve.myserver.platform.bungeecord.BungeeBridge;
 import au.com.grieve.myserver.platform.bungeecord.BungeePlugin;
-import au.com.grieve.myserver.templates.server.BaseServer;
-import au.com.grieve.myserver.templates.server.ServerTemplate;
+import au.com.grieve.myserver.platform.bungeecord.api.templates.server.IBungeeServer;
+import au.com.grieve.myserver.templates.server.Server;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -66,9 +65,9 @@ public class AdminServerCommand extends AdminCommand {
     }
 
     @Arg("create @string @MSTemplate(filter=server)")
-    public void onCreate(CommandSender sender, String name, ServerTemplate template) {
+    public void onCreate(CommandSender sender, String name, IServerTemplate template) {
         try {
-            Server server = template.createServer(name);
+            template.createServer(name);
             sendMessage(sender, new ComponentBuilder("Created Server: " + name).color(ChatColor.AQUA).create());
         } catch (InvalidServerException | IOException e) {
             sendMessage(sender, new ComponentBuilder(e.getMessage()).color(ChatColor.RED).create());
@@ -76,7 +75,7 @@ public class AdminServerCommand extends AdminCommand {
     }
 
     @Arg("destroy @MSServer")
-    public void onDestroy(CommandSender sender, Server server) {
+    public void onDestroy(CommandSender sender, IBungeeServer server) {
         try {
             server.destroy();
             sendMessage(sender, new ComponentBuilder("Destroyed Server: " + server.getName()).create());
@@ -86,12 +85,12 @@ public class AdminServerCommand extends AdminCommand {
     }
 
     @Arg("info @MSServer")
-    public void onServerInfo(CommandSender sender, BungeeBridge server) {
+    public void onServerInfo(CommandSender sender, IBungeeServer server) {
         sendMessage(sender, server.bungeeGetInfo());
     }
 
     @Arg("edit @MSServer tag set @MSTagDefinition @MSTagValue")
-    public void onServerTagsSet(CommandSender sender, BaseServer server, TagDefinition definition, String value) {
+    public void onServerTagsSet(CommandSender sender, IBungeeServer server, TagDefinition definition, String value) {
         server.setTag(definition.getName(), value);
         sendMessage(sender, new ComponentBuilder("Set Tag: ").color(ChatColor.AQUA)
                 .append(definition.getName()).color(ChatColor.WHITE)
@@ -102,7 +101,7 @@ public class AdminServerCommand extends AdminCommand {
     }
 
     @Arg("edit @MSServer tag reset @MSTagDefinition")
-    public void onServerTagsClear(CommandSender sender, BaseServer server, TagDefinition definition) {
+    public void onServerTagsClear(CommandSender sender, IBungeeServer server, TagDefinition definition) {
         server.resetTag(definition.getName());
         sendMessage(sender, new ComponentBuilder("Reset Tag: ").color(ChatColor.AQUA)
                 .append(definition.getName()).color(ChatColor.WHITE)
@@ -111,5 +110,27 @@ public class AdminServerCommand extends AdminCommand {
                 .append(" (Default Value)").color(ChatColor.YELLOW)
                 .create()
         );
+    }
+
+    @Arg("start @MSServer")
+    public void onServerStart(CommandSender sender, IBungeeServer server) {
+        try {
+            sendMessage(sender, new ComponentBuilder("Starting Server: ").color(ChatColor.AQUA)
+                    .append(server.getName()).color(ChatColor.WHITE).create());
+            server.start();
+        } catch (InvalidServerException | IOException e) {
+            sendMessage(sender, new ComponentBuilder(e.getMessage()).color(ChatColor.RED).create());
+        }
+    }
+
+    @Arg("stop @MSServer")
+    public void onServerStop(CommandSender sender, IBungeeServer server) {
+        try {
+            sendMessage(sender, new ComponentBuilder("Stopping Server: ").color(ChatColor.AQUA)
+                    .append(server.getName()).color(ChatColor.WHITE).create());
+            server.stop();
+        } catch (InvalidServerException | IOException e) {
+            sendMessage(sender, new ComponentBuilder(e.getMessage()).color(ChatColor.RED).create());
+        }
     }
 }

@@ -26,8 +26,8 @@ package au.com.grieve.myserver.platform.bungeecord.commands;
 
 import au.com.grieve.bcf.annotations.Arg;
 import au.com.grieve.bcf.annotations.Command;
-import au.com.grieve.myserver.platform.bungeecord.BungeeBridge;
 import au.com.grieve.myserver.platform.bungeecord.BungeePlugin;
+import au.com.grieve.myserver.platform.bungeecord.api.templates.IBungeeTemplate;
 import au.com.grieve.myserver.templates.server.ServerTemplate;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
@@ -60,7 +60,7 @@ public class AdminTemplateCommand extends MyServerCommand {
     }
 
     @Arg("info @MSTemplate(filter=server)")
-    public void onTemplateInfo(CommandSender sender, BungeeBridge template) {
+    public void onTemplateInfo(CommandSender sender, IBungeeTemplate template) {
         sendMessage(sender, template.bungeeGetInfo());
     }
 

@@ -22,40 +22,26 @@
  * SOFTWARE.
  */
 
-package au.com.grieve.myserver;
+package au.com.grieve.myserver.platform.bungeecord.exceptions;
 
-import au.com.grieve.myserver.api.BaseConfig;
-import au.com.grieve.myserver.api.scheduler.ITaskScheduler;
-import lombok.Getter;
-
-
-/**
- * Main Server Manager
- */
-@Getter
-public abstract class MyServer {
-    private final BaseConfig config;
-    private final TemplateManager templateManager;
-    private final ServerManager serverManager;
-
-    public MyServer(BaseConfig config) {
-        this.config = config;
-        this.templateManager = createTemplateManager();
-        this.serverManager = createServerManager();
+public class PortNotFoundException extends Exception {
+    public PortNotFoundException() {
+        super();
     }
 
-    protected TemplateManager createTemplateManager() {
-        return new TemplateManager(this);
+    public PortNotFoundException(String message) {
+        super(message);
     }
 
-    protected ServerManager createServerManager() {
-        return new ServerManager(this);
+    public PortNotFoundException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    /**
-     * Retrieve a scheduler
-     *
-     * @return a scheduler
-     */
-    public abstract ITaskScheduler getScheduler();
+    public PortNotFoundException(Throwable cause) {
+        super(cause);
+    }
+
+    protected PortNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
 }

@@ -24,11 +24,11 @@
 
 package au.com.grieve.myserver;
 
-import au.com.grieve.myserver.api.Server;
 import au.com.grieve.myserver.exceptions.InvalidServerException;
 import au.com.grieve.myserver.exceptions.InvalidTemplateException;
 import au.com.grieve.myserver.exceptions.NoSuchServerException;
 import au.com.grieve.myserver.exceptions.NoSuchTemplateException;
+import au.com.grieve.myserver.templates.server.Server;
 import au.com.grieve.myserver.templates.server.ServerTemplate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,8 +52,13 @@ import java.util.stream.Stream;
 public class ServerManager {
     public static ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
 
-    private final ConcurrentMap<UUID, Server> serverInstances = new MapMaker()
+    // Weak references to Servers (for since instance purposes)
+    private final ConcurrentMap<UUID, Server> serverCache = new MapMaker()
             .weakValues()
+            .makeMap();
+
+    // Strong references to Servers
+    private final ConcurrentMap<UUID, Server> serverInstances = new MapMaker()
             .makeMap();
 
     private final MyServer myServer;
@@ -140,9 +145,9 @@ public class ServerManager {
         UUID uuid = UUID.fromString(rootNode.get("uuid").asText());
 
         // Check if we already have this server in use and return that instead
-        if (serverInstances.containsKey(uuid)) {
+        if (serverCache.containsKey(uuid)) {
             // TODO update instance with new data maybe
-            return serverInstances.get(uuid);
+            return serverCache.get(uuid);
         }
 
         if (!rootNode.has("template")) {
@@ -154,7 +159,7 @@ public class ServerManager {
         ServerTemplate template = getMyServer().getTemplateManager().getTemplate(ServerTemplate.class, templateName);
 
         Server server = template.loadServer(serverPath);
-        serverInstances.put(uuid, server);
+        serverCache.put(uuid, server);
         return server;
     }
 

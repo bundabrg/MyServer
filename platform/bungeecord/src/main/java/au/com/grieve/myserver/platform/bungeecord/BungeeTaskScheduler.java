@@ -22,40 +22,45 @@
  * SOFTWARE.
  */
 
-package au.com.grieve.myserver;
+package au.com.grieve.myserver.platform.bungeecord;
 
-import au.com.grieve.myserver.api.BaseConfig;
+import au.com.grieve.myserver.api.scheduler.IScheduledTask;
 import au.com.grieve.myserver.api.scheduler.ITaskScheduler;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import net.md_5.bungee.api.scheduler.TaskScheduler;
 
+import java.util.concurrent.TimeUnit;
 
-/**
- * Main Server Manager
- */
 @Getter
-public abstract class MyServer {
-    private final BaseConfig config;
-    private final TemplateManager templateManager;
-    private final ServerManager serverManager;
+@RequiredArgsConstructor
+public class BungeeTaskScheduler implements ITaskScheduler {
+    private final BungeePlugin plugin;
+    private final TaskScheduler realScheduler;
 
-    public MyServer(BaseConfig config) {
-        this.config = config;
-        this.templateManager = createTemplateManager();
-        this.serverManager = createServerManager();
+    @Override
+    public void cancel(int id) {
+        realScheduler.cancel(id);
     }
 
-    protected TemplateManager createTemplateManager() {
-        return new TemplateManager(this);
+    @Override
+    public void cancel(IScheduledTask task) {
+        realScheduler.cancel(((BungeeScheduledTask) task).getRealScheduledTask());
+
     }
 
-    protected ServerManager createServerManager() {
-        return new ServerManager(this);
+    @Override
+    public IScheduledTask runAsync(Runnable runnable) {
+        return new BungeeScheduledTask(realScheduler.runAsync(plugin, runnable));
     }
 
-    /**
-     * Retrieve a scheduler
-     *
-     * @return a scheduler
-     */
-    public abstract ITaskScheduler getScheduler();
+    @Override
+    public IScheduledTask schedule(Runnable runnable, long delay, TimeUnit timeUnit) {
+        return new BungeeScheduledTask(realScheduler.schedule(plugin, runnable, delay, timeUnit));
+    }
+
+    @Override
+    public IScheduledTask schedule(Runnable runnable, long delay, long repeat, TimeUnit timeUnit) {
+        return new BungeeScheduledTask(realScheduler.schedule(plugin, runnable, delay, repeat, timeUnit));
+    }
 }

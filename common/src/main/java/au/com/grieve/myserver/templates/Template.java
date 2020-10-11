@@ -25,6 +25,7 @@
 package au.com.grieve.myserver.templates;
 
 import au.com.grieve.myserver.TemplateManager;
+import au.com.grieve.myserver.api.templates.ITemplate;
 import au.com.grieve.myserver.exceptions.InvalidTemplateException;
 import au.com.grieve.myserver.exceptions.NoSuchTemplateException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -40,23 +41,30 @@ import java.util.List;
 
 @Getter
 @ToString
-public abstract class Template {
+public abstract class Template implements ITemplate {
     public static ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
 
     private final TemplateManager templateManager;
     private final Path templatePath;
     private final JsonNode node;
     private final String name;
-    private final List<Template> parents = new ArrayList<>();
+    private final String description;
+    private final List<ITemplate> parents = new ArrayList<>();
 
     public Template(TemplateManager templateManager, Path templatePath) throws NoSuchTemplateException, InvalidTemplateException, IOException {
         this.templateManager = templateManager;
         this.templatePath = templatePath;
         this.node = MAPPER.readTree(templatePath.resolve("template.yml").toFile());
+
+        if (!node.has("name")) {
+            throw new InvalidTemplateException("Missing field: name");
+        }
         this.name = node.get("name").asText();
+
+        this.description = node.has("description") ? node.get("description").asText() : "";
         if (node.has("parents")) {
             for (JsonNode n : node.get("parents")) {
-                Template parentTemplate = templateManager.getTemplate(Template.class, n.asText());
+                ITemplate parentTemplate = templateManager.getTemplate(Template.class, n.asText());
                 this.parents.add(parentTemplate);
             }
         }
@@ -67,6 +75,7 @@ public abstract class Template {
      *
      * @return list of all nodes
      */
+    @Override
     public List<JsonNode> getAllNodes() {
         return getAllNodes(new ArrayList<>());
     }
@@ -82,8 +91,8 @@ public abstract class Template {
         result.add(node);
         current.add(node);
 
-        for (Template parent : parents) {
-            List<JsonNode> parentNodes = parent.getAllNodes(current);
+        for (ITemplate parent : parents) {
+            List<JsonNode> parentNodes = ((Template) parent).getAllNodes(current);
             result.addAll(parentNodes);
             current.addAll(parentNodes);
         }

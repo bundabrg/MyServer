@@ -22,40 +22,21 @@
  * SOFTWARE.
  */
 
-package au.com.grieve.myserver;
+package au.com.grieve.myserver.api.templates;
 
-import au.com.grieve.myserver.api.BaseConfig;
-import au.com.grieve.myserver.api.scheduler.ITaskScheduler;
-import lombok.Getter;
+import au.com.grieve.myserver.api.TagDefinition;
 
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
 
-/**
- * Main Server Manager
- */
-@Getter
-public abstract class MyServer {
-    private final BaseConfig config;
-    private final TemplateManager templateManager;
-    private final ServerManager serverManager;
+public interface ITagsTemplate extends ITemplate {
+    Map<String, TagDefinition> getTags();
 
-    public MyServer(BaseConfig config) {
-        this.config = config;
-        this.templateManager = createTemplateManager();
-        this.serverManager = createServerManager();
+    Map<TemplateFileEnum, List<Path>> getTemplateFiles();
+
+    enum TemplateFileEnum {
+        STATIC,
+        DYNAMIC
     }
-
-    protected TemplateManager createTemplateManager() {
-        return new TemplateManager(this);
-    }
-
-    protected ServerManager createServerManager() {
-        return new ServerManager(this);
-    }
-
-    /**
-     * Retrieve a scheduler
-     *
-     * @return a scheduler
-     */
-    public abstract ITaskScheduler getScheduler();
 }

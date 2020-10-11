@@ -24,6 +24,7 @@
 
 package au.com.grieve.myserver;
 
+import au.com.grieve.myserver.api.templates.ITemplate;
 import au.com.grieve.myserver.exceptions.InvalidTemplateException;
 import au.com.grieve.myserver.exceptions.NoSuchTemplateException;
 import au.com.grieve.myserver.templates.Template;
@@ -57,8 +58,8 @@ import java.util.stream.Stream;
 public class TemplateManager {
     public static ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
 
-    private final Map<String, Class<? extends Template>> registeredTemplateTypes = new HashMap<>();
-    private final ConcurrentMap<String, Template> templateInstances = new MapMaker()
+    private final Map<String, Class<? extends ITemplate>> registeredTemplateTypes = new HashMap<>();
+    private final ConcurrentMap<String, ITemplate> templateInstances = new MapMaker()
             .weakValues()
             .makeMap();
     private final Queue<String> templateLocks = new ConcurrentLinkedQueue<>();
@@ -88,7 +89,7 @@ public class TemplateManager {
         }
 
         // Load the template
-        Template template = loadTemplate(templatePath);
+        ITemplate template = loadTemplate(templatePath);
 
         if (!typeClass.isAssignableFrom(template.getClass())) {
             throw new InvalidTemplateException("Template '" + name + "' is not of type '" + typeClass);
@@ -151,7 +152,7 @@ public class TemplateManager {
         List<T> result = new ArrayList<>();
 
         for (Map.Entry<String, Path> entry : getTemplatePaths().entrySet()) {
-            Template template;
+            ITemplate template;
             try {
                 template = loadTemplate(entry.getValue());
             } catch (IOException | InvalidTemplateException e) {
@@ -170,7 +171,7 @@ public class TemplateManager {
     }
 
     @SuppressWarnings("UnusedReturnValue")
-    public TemplateManager registerTemplateType(String name, Class<? extends Template> templateClass) {
+    public TemplateManager registerTemplateType(String name, Class<? extends ITemplate> templateClass) {
         registeredTemplateTypes.put(name, templateClass);
         return this;
     }
@@ -180,7 +181,7 @@ public class TemplateManager {
      *
      * @param path Path of template
      */
-    public Template loadTemplate(Path path) throws IOException, InvalidTemplateException {
+    public ITemplate loadTemplate(Path path) throws IOException, InvalidTemplateException {
         JsonNode rootNode = MAPPER.readTree(path.resolve("template.yml").toFile());
 
         if (!rootNode.has("name")) {
@@ -216,7 +217,7 @@ public class TemplateManager {
         templateLocks.add(templateName);
 
         try {
-            Template result = registeredTemplateTypes.get(templateSubName)
+            ITemplate result = registeredTemplateTypes.get(templateSubName)
                     .getConstructor(TemplateManager.class, Path.class)
                     .newInstance(this, path);
             templateInstances.put(templateName, result);

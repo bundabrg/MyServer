@@ -24,12 +24,108 @@
 
 package au.com.grieve.myserver.platform.bungeecord;
 
-import au.com.grieve.myserver.MyServer;
 import au.com.grieve.myserver.ServerManager;
+import au.com.grieve.myserver.api.ServerStatus;
+import au.com.grieve.myserver.platform.bungeecord.api.templates.server.IBungeeServer;
+import au.com.grieve.myserver.platform.bungeecord.exceptions.PortNotFoundException;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.config.ServerInfo;
+
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class BungeeServerManager extends ServerManager {
-    public BungeeServerManager(MyServer myServer) {
+
+    private final List<Integer> reservedPorts = new ArrayList<>();
+
+
+    public BungeeServerManager(BungeeMyServer myServer) {
         super(myServer);
+    }
+
+    @Override
+    public BungeeMyServer getMyServer() {
+        return (BungeeMyServer) super.getMyServer();
+    }
+
+    /**
+     * Return an unused port and reserves it
+     *
+     * @return first unused free port
+     */
+    protected int reservePort() throws PortNotFoundException {
+        int startPort = getMyServer().getConfig().getBungeecord().getPortStart();
+        int amount = getMyServer().getConfig().getBungeecord().getPortAmount();
+        for (int port = startPort; port < startPort + amount; port++) {
+            if (!reservedPorts.contains(port)) {
+                return port;
+            }
+        }
+        throw new PortNotFoundException("No free port");
+    }
+
+    protected void releasePort(int port) {
+        reservedPorts.remove(port);
+    }
+
+    public void registerBungeeServer(IBungeeServer server) throws PortNotFoundException {
+        int port = reservePort();
+        try {
+            server.setServerPort(port);
+            server.setServerIp("127.0.0.1");
+
+            ServerInfo info = getMyServer().getPlugin().getProxy().constructServerInfo(
+                    server.getName(),
+                    new InetSocketAddress("127.0.0.1", port),
+                    server.getName(),
+                    true); // TODO Implement restricted tag
+
+            getMyServer().getPlugin().getProxy().getServers().put(server.getName(), info);
+        } catch (Exception e) {
+            releasePort(port);
+            throw e;
+        }
+    }
+
+    public void unregisterBungeeServer(IBungeeServer server) {
+        getMyServer().getPlugin().getProxy().getServers().remove(server.getName());
+        server.setServerPort(null);
+        server.setServerIp(null);
+    }
+
+    public void serverPing(IBungeeServer server, Consumer<Boolean> consumer) {
+        ServerInfo serverInfo = getMyServer().getPlugin().getProxy().getServers().get(server.getName());
+        if (serverInfo == null) {
+            consumer.accept(false);
+            return;
+        }
+
+        serverInfo.ping((serverPing, ex) -> consumer.accept(serverPing != null));
+    }
+
+    public BaseComponent[] statusToComponent(ServerStatus status) {
+        ComponentBuilder cb = new ComponentBuilder(status.name());
+        switch (status) {
+            case ERROR:
+            case STOPPING:
+            case STOPPED:
+                cb.color(ChatColor.RED);
+                break;
+            case INIT:
+                cb.color(ChatColor.BLUE);
+                break;
+            case STARTING:
+            case STARTED:
+                cb.color(ChatColor.GREEN);
+                break;
+            default:
+                cb.color(ChatColor.GRAY);
+        }
+        return cb.create();
     }
 
 }

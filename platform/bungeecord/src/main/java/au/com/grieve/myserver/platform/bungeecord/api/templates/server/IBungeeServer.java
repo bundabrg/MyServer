@@ -22,40 +22,17 @@
  * SOFTWARE.
  */
 
-package au.com.grieve.myserver;
+package au.com.grieve.myserver.platform.bungeecord.api.templates.server;
 
-import au.com.grieve.myserver.api.BaseConfig;
-import au.com.grieve.myserver.api.scheduler.ITaskScheduler;
-import lombok.Getter;
+import au.com.grieve.myserver.api.templates.server.IServer;
+import net.md_5.bungee.api.chat.BaseComponent;
 
-
-/**
- * Main Server Manager
- */
-@Getter
-public abstract class MyServer {
-    private final BaseConfig config;
-    private final TemplateManager templateManager;
-    private final ServerManager serverManager;
-
-    public MyServer(BaseConfig config) {
-        this.config = config;
-        this.templateManager = createTemplateManager();
-        this.serverManager = createServerManager();
-    }
-
-    protected TemplateManager createTemplateManager() {
-        return new TemplateManager(this);
-    }
-
-    protected ServerManager createServerManager() {
-        return new ServerManager(this);
-    }
-
+public interface IBungeeServer extends IServer {
     /**
-     * Retrieve a scheduler
+     * Return bungee information about server
      *
-     * @return a scheduler
+     * @return BaseComponent info
      */
-    public abstract ITaskScheduler getScheduler();
+    BaseComponent[] bungeeGetInfo();
+
 }

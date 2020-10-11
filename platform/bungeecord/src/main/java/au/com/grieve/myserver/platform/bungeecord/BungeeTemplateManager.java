@@ -24,16 +24,15 @@
 
 package au.com.grieve.myserver.platform.bungeecord;
 
-import net.md_5.bungee.api.chat.BaseComponent;
+import au.com.grieve.myserver.TemplateManager;
 
-/**
- * Add Bungee specific parameters to Templates
- */
-public interface BungeeBridge {
-    /**
-     * Return bungee information about template
-     *
-     * @return BaseComponent info
-     */
-    BaseComponent[] bungeeGetInfo();
+public class BungeeTemplateManager extends TemplateManager {
+    public BungeeTemplateManager(BungeeMyServer myServer) {
+        super(myServer);
+    }
+
+    @Override
+    public BungeeMyServer getMyServer() {
+        return (BungeeMyServer) super.getMyServer();
+    }
 }

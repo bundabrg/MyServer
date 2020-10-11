@@ -54,7 +54,13 @@ public class SimpleTemplater {
         return this;
     }
 
-    protected String replace(String input) {
+    /**
+     * Replace parameters in a String returning the updated String
+     *
+     * @param input the original string
+     * @return the updated string
+     */
+    public String replace(String input) {
         Pattern p = Pattern.compile("\\{\\{ *([^} ]+) *}}");
 
         for (int maxTries = 20; maxTries > 0; maxTries--) {
@@ -82,6 +88,14 @@ public class SimpleTemplater {
         throw new RuntimeException("Too many recursions in Placeholder");
     }
 
+    /**
+     * Replace strings in the reader and write to the writer
+     *
+     * @param in  the input
+     * @param out the output
+     * @return ourself for chaining
+     * @throws IOException IOException
+     */
     public SimpleTemplater process(BufferedReader in, BufferedWriter out) throws IOException {
         for (String line; ((line = in.readLine()) != null); ) {
             out.write(replace(line));

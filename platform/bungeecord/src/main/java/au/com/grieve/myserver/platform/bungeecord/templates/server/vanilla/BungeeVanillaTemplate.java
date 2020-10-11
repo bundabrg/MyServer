@@ -22,15 +22,14 @@
  * SOFTWARE.
  */
 
-package au.com.grieve.myserver.platform.bungeecord.templates.server;
+package au.com.grieve.myserver.platform.bungeecord.templates.server.vanilla;
 
 import au.com.grieve.myserver.TemplateManager;
-import au.com.grieve.myserver.api.Server;
-import au.com.grieve.myserver.exceptions.InvalidServerException;
 import au.com.grieve.myserver.exceptions.InvalidTemplateException;
 import au.com.grieve.myserver.exceptions.NoSuchTemplateException;
-import au.com.grieve.myserver.platform.bungeecord.BungeeBridge;
-import au.com.grieve.myserver.templates.server.vanilla.VanillaServerTemplate;
+import au.com.grieve.myserver.platform.bungeecord.api.templates.IBungeeTemplate;
+import au.com.grieve.myserver.templates.server.Server;
+import au.com.grieve.myserver.templates.server.vanilla.VanillaTemplate;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -38,7 +37,7 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public class BungeeVanillaServerTemplate extends VanillaServerTemplate implements BungeeBridge {
+public class BungeeVanillaTemplate extends VanillaTemplate implements IBungeeTemplate {
 
 
     /**
@@ -47,7 +46,7 @@ public class BungeeVanillaServerTemplate extends VanillaServerTemplate implement
      * @param templateManager The assoiated TemplateManager
      * @param templatePath    The template path
      */
-    public BungeeVanillaServerTemplate(TemplateManager templateManager, Path templatePath) throws NoSuchTemplateException, InvalidTemplateException, IOException {
+    public BungeeVanillaTemplate(TemplateManager templateManager, Path templatePath) throws NoSuchTemplateException, InvalidTemplateException, IOException {
         super(templateManager, templatePath);
     }
 
@@ -55,19 +54,15 @@ public class BungeeVanillaServerTemplate extends VanillaServerTemplate implement
     public BaseComponent[] bungeeGetInfo() {
         return new ComponentBuilder()
                 .append("Name: ").color(ChatColor.YELLOW).append(getName()).color(ChatColor.WHITE)
-                .append("\nServer: ").color(ChatColor.YELLOW)
-                .append("\n  Version: ").color(ChatColor.YELLOW).append(getServer().getVersion()).color(ChatColor.WHITE)
-                .append("\n  Description: ").color(ChatColor.YELLOW).append(getServer().getDescription()).color(ChatColor.WHITE)
+                .append("\nDescription: ").color(ChatColor.YELLOW).append(getDescription()).color(ChatColor.WHITE)
+                .append("\nVanilla: ").color(ChatColor.YELLOW)
+                .append("\n  Version: ").color(ChatColor.YELLOW).append(getVersion()).color(ChatColor.WHITE)
                 .append("\nTags: ").color(ChatColor.YELLOW).append(String.valueOf(getTags().size())).color(ChatColor.WHITE).append(" tag(s)")
                 .create();
     }
 
     @Override
-    public Server loadServer(Path serverPath) throws InvalidServerException, IOException {
-        return BungeeVanillaServer.builder()
-                .template(this)
-                .serverPath(serverPath)
-                .build()
-                .load();
+    public Server newServer(Path serverPath) {
+        return new BungeeVanillaServer(this, serverPath);
     }
 }

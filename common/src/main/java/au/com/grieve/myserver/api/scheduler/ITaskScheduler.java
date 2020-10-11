@@ -22,40 +22,18 @@
  * SOFTWARE.
  */
 
-package au.com.grieve.myserver;
+package au.com.grieve.myserver.api.scheduler;
 
-import au.com.grieve.myserver.api.BaseConfig;
-import au.com.grieve.myserver.api.scheduler.ITaskScheduler;
-import lombok.Getter;
+import java.util.concurrent.TimeUnit;
 
+public interface ITaskScheduler {
+    void cancel(int id);
 
-/**
- * Main Server Manager
- */
-@Getter
-public abstract class MyServer {
-    private final BaseConfig config;
-    private final TemplateManager templateManager;
-    private final ServerManager serverManager;
+    void cancel(IScheduledTask task);
 
-    public MyServer(BaseConfig config) {
-        this.config = config;
-        this.templateManager = createTemplateManager();
-        this.serverManager = createServerManager();
-    }
+    IScheduledTask runAsync(Runnable runnable);
 
-    protected TemplateManager createTemplateManager() {
-        return new TemplateManager(this);
-    }
+    IScheduledTask schedule(Runnable runnable, long delay, TimeUnit timeUnit);
 
-    protected ServerManager createServerManager() {
-        return new ServerManager(this);
-    }
-
-    /**
-     * Retrieve a scheduler
-     *
-     * @return a scheduler
-     */
-    public abstract ITaskScheduler getScheduler();
+    IScheduledTask schedule(Runnable runnable, long delay, long repeat, TimeUnit timeUnit);
 }

@@ -26,18 +26,21 @@ package au.com.grieve.myserver.platform.bungeecord;
 
 import au.com.grieve.myserver.MyServer;
 import au.com.grieve.myserver.ServerManager;
+import au.com.grieve.myserver.TemplateManager;
 import au.com.grieve.myserver.platform.bungeecord.config.BungeeConfig;
-import au.com.grieve.myserver.platform.bungeecord.templates.server.BungeeVanillaServerTemplate;
+import au.com.grieve.myserver.platform.bungeecord.templates.server.vanilla.BungeeVanillaTemplate;
 import au.com.grieve.myserver.templates.definition.DefinitionTemplate;
 import lombok.Getter;
 
 @Getter
 public class BungeeMyServer extends MyServer {
     private final BungeePlugin plugin;
+    private final BungeeTaskScheduler scheduler;
 
     public BungeeMyServer(BungeeConfig config, BungeePlugin plugin) {
         super(config);
         this.plugin = plugin;
+        this.scheduler = new BungeeTaskScheduler(getPlugin(), getPlugin().getProxy().getScheduler());
 
         // Register BuiltIn Template Types
         registerBuiltinTemplateTypes();
@@ -46,7 +49,12 @@ public class BungeeMyServer extends MyServer {
     protected void registerBuiltinTemplateTypes() {
         getTemplateManager()
                 .registerTemplateType("def", DefinitionTemplate.class)
-                .registerTemplateType("server/vanilla/1.0", BungeeVanillaServerTemplate.class);
+                .registerTemplateType("server/vanilla/1.0", BungeeVanillaTemplate.class);
+    }
+
+    @Override
+    public BungeeConfig getConfig() {
+        return (BungeeConfig) super.getConfig();
     }
 
     @Override
@@ -55,7 +63,17 @@ public class BungeeMyServer extends MyServer {
     }
 
     @Override
+    protected TemplateManager createTemplateManager() {
+        return new BungeeTemplateManager(this);
+    }
+
+    @Override
     public BungeeServerManager getServerManager() {
         return (BungeeServerManager) super.getServerManager();
+    }
+
+    @Override
+    public BungeeTemplateManager getTemplateManager() {
+        return (BungeeTemplateManager) super.getTemplateManager();
     }
 }

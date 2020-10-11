@@ -22,40 +22,12 @@
  * SOFTWARE.
  */
 
-package au.com.grieve.myserver;
+package au.com.grieve.myserver.api.scheduler;
 
-import au.com.grieve.myserver.api.BaseConfig;
-import au.com.grieve.myserver.api.scheduler.ITaskScheduler;
-import lombok.Getter;
+public interface IScheduledTask {
+    int getId();
 
+    Runnable getTask();
 
-/**
- * Main Server Manager
- */
-@Getter
-public abstract class MyServer {
-    private final BaseConfig config;
-    private final TemplateManager templateManager;
-    private final ServerManager serverManager;
-
-    public MyServer(BaseConfig config) {
-        this.config = config;
-        this.templateManager = createTemplateManager();
-        this.serverManager = createServerManager();
-    }
-
-    protected TemplateManager createTemplateManager() {
-        return new TemplateManager(this);
-    }
-
-    protected ServerManager createServerManager() {
-        return new ServerManager(this);
-    }
-
-    /**
-     * Retrieve a scheduler
-     *
-     * @return a scheduler
-     */
-    public abstract ITaskScheduler getScheduler();
+    void cancel();
 }

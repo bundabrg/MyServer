@@ -22,46 +22,20 @@
  * SOFTWARE.
  */
 
-package au.com.grieve.myserver.api;
+package au.com.grieve.myserver.platform.bungeecord.api.templates;
 
-import au.com.grieve.myserver.exceptions.InvalidServerException;
-import au.com.grieve.myserver.templates.Template;
+import au.com.grieve.myserver.api.templates.server.IServerTemplate;
+import net.md_5.bungee.api.chat.BaseComponent;
 
-import java.io.IOException;
-import java.util.UUID;
-
-public interface Server {
+/**
+ * Add Bungee specific parameters to Templates
+ */
+public interface IBungeeTemplate extends IServerTemplate {
     /**
-     * Return Server's UUID
+     * Return bungee information about template
      *
-     * @return server uuid
+     * @return BaseComponent info
      */
-    UUID getUuid();
+    BaseComponent[] bungeeGetInfo();
 
-    /**
-     * Return Server's Name
-     *
-     * @return server name
-     */
-    String getName();
-
-    /**
-     * Save Server
-     */
-    Server save() throws IOException;
-
-    /**
-     * Load Server
-     */
-    Server load() throws InvalidServerException, IOException;
-
-    /**
-     * Get Server Template
-     */
-    Template getTemplate();
-
-    /**
-     * Destroy a Server
-     */
-    void destroy() throws IOException;
 }

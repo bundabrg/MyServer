@@ -29,10 +29,9 @@ import au.com.grieve.bcf.CommandContext;
 import au.com.grieve.bcf.CommandManager;
 import au.com.grieve.bcf.exceptions.ParserInvalidResultException;
 import au.com.grieve.bcf.parsers.SingleParser;
-import au.com.grieve.myserver.api.Server;
 import au.com.grieve.myserver.exceptions.NoSuchServerException;
 import au.com.grieve.myserver.platform.bungeecord.BungeePlugin;
-import au.com.grieve.myserver.templates.server.BaseServer;
+import au.com.grieve.myserver.templates.server.Server;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,9 +46,9 @@ public class MSServer extends SingleParser {
     }
 
     @Override
-    protected BaseServer result() throws ParserInvalidResultException {
+    protected Server result() throws ParserInvalidResultException {
         try {
-            return (BaseServer) BungeePlugin.INSTANCE.getMyServer().getServerManager().getServer(getInput().toLowerCase());
+            return BungeePlugin.INSTANCE.getMyServer().getServerManager().getServer(getInput().toLowerCase());
         } catch (NoSuchServerException ignored) {
         }
         throw new ParserInvalidResultException(this, "No such server");

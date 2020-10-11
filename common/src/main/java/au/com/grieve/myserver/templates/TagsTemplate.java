@@ -27,6 +27,7 @@ package au.com.grieve.myserver.templates;
 import au.com.grieve.myserver.TemplateManager;
 import au.com.grieve.myserver.api.TagDefinition;
 import au.com.grieve.myserver.api.TypeEnum;
+import au.com.grieve.myserver.api.templates.ITagsTemplate;
 import au.com.grieve.myserver.exceptions.InvalidTemplateException;
 import au.com.grieve.myserver.exceptions.NoSuchTemplateException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -45,7 +46,7 @@ import java.util.Map;
  * A Template that contains tags and template files
  */
 @Getter
-public class TagsTemplate extends Template {
+public class TagsTemplate extends Template implements ITagsTemplate {
     private final Map<String, TagDefinition> tags = new HashMap<>();
     private final Map<TemplateFileEnum, List<Path>> templateFiles = new HashMap<>();
 
@@ -63,6 +64,7 @@ public class TagsTemplate extends Template {
                             .description(node.has("description") ? node.get("description").asText() : null)
                             .defaultValue(node.has("default") ? node.get("default").asText() : null)
                             .permission(node.has("permission") ? node.get("permission").asText() : null)
+                            .required(node.has("required") && node.get("required").asBoolean())
                             .build());
                 }
             }
@@ -93,8 +95,4 @@ public class TagsTemplate extends Template {
     }
 
 
-    public enum TemplateFileEnum {
-        STATIC,
-        DYNAMIC
-    }
 }

@@ -22,40 +22,35 @@
  * SOFTWARE.
  */
 
-package au.com.grieve.myserver;
+package au.com.grieve.myserver.api.templates.server;
 
-import au.com.grieve.myserver.api.BaseConfig;
-import au.com.grieve.myserver.api.scheduler.ITaskScheduler;
-import lombok.Getter;
+import au.com.grieve.myserver.api.templates.ITagsTemplate;
+import au.com.grieve.myserver.exceptions.InvalidServerException;
+import au.com.grieve.myserver.templates.server.Server;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
 
-/**
- * Main Server Manager
- */
-@Getter
-public abstract class MyServer {
-    private final BaseConfig config;
-    private final TemplateManager templateManager;
-    private final ServerManager serverManager;
+public interface IServerTemplate extends ITagsTemplate {
+    Server createServer(String name) throws InvalidServerException, IOException;
 
-    public MyServer(BaseConfig config) {
-        this.config = config;
-        this.templateManager = createTemplateManager();
-        this.serverManager = createServerManager();
-    }
-
-    protected TemplateManager createTemplateManager() {
-        return new TemplateManager(this);
-    }
-
-    protected ServerManager createServerManager() {
-        return new ServerManager(this);
-    }
+    Server loadServer(Path serverPath) throws InvalidServerException, IOException;
 
     /**
-     * Retrieve a scheduler
+     * Create a new Server instance
      *
-     * @return a scheduler
+     * @return Server Instance
      */
-    public abstract ITaskScheduler getScheduler();
+    Server newServer(Path serverPath);
+
+    String getServerStartExecute();
+
+    List<String> getServerStartCommands();
+
+    int getServerStartDelay();
+
+    List<String> getServerStopCommands();
+
+    int getServerStopWait();
 }

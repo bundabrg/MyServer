@@ -41,6 +41,7 @@ public class TagDefinition {
     private final TypeEnum type;
     private final String defaultValue;
     private final String permission;
+    private final boolean required;
     private final List<String> choices = new ArrayList<>();
 
     /**

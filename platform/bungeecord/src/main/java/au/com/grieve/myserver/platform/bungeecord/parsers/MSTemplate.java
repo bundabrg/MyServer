@@ -29,6 +29,7 @@ import au.com.grieve.bcf.CommandContext;
 import au.com.grieve.bcf.CommandManager;
 import au.com.grieve.bcf.exceptions.ParserInvalidResultException;
 import au.com.grieve.bcf.parsers.SingleParser;
+import au.com.grieve.myserver.api.templates.ITemplate;
 import au.com.grieve.myserver.exceptions.InvalidTemplateException;
 import au.com.grieve.myserver.exceptions.NoSuchTemplateException;
 import au.com.grieve.myserver.platform.bungeecord.BungeePlugin;
@@ -53,7 +54,7 @@ public class MSTemplate extends SingleParser {
     @Override
     protected Object result() throws ParserInvalidResultException {
         try {
-            Template result = BungeePlugin.INSTANCE.getMyServer().getTemplateManager().getTemplate(Template.class, getInput().toLowerCase());
+            ITemplate result = BungeePlugin.INSTANCE.getMyServer().getTemplateManager().getTemplate(Template.class, getInput().toLowerCase());
             if (result.getName().startsWith(getParameter("filter", ""))) {
                 return result;
             }
@@ -65,7 +66,7 @@ public class MSTemplate extends SingleParser {
     @Override
     protected List<String> complete() {
         return BungeePlugin.INSTANCE.getMyServer().getTemplateManager().getTemplates(Template.class).stream()
-                .map(Template::getName)
+                .map(ITemplate::getName)
                 .filter(s -> s.startsWith(getParameter("filter", "")))
                 .filter(s -> s.toLowerCase().startsWith(getInput().toLowerCase()))
                 .limit(20)
