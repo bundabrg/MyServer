@@ -94,8 +94,8 @@ public class AdminServerCommand extends AdminCommand {
         sendMessage(sender, server.bungeeGetInfo());
     }
 
-    @Arg("edit @MSServer tag set @MSTagDefinition @MSTagValue")
-    public void onServerTagsSet(CommandSender sender, IBungeeServer server, TagDefinition definition, String value) {
+    @Arg("edit @MSServer set @MSTagDefinition @MSTagValue")
+    public void onServerEditSet(CommandSender sender, IBungeeServer server, TagDefinition definition, String value) {
         server.setTag(definition.getName(), value);
         sendMessage(sender, new ComponentBuilder("Set Tag: ").color(ChatColor.AQUA)
                 .append(definition.getName()).color(ChatColor.WHITE)
@@ -105,10 +105,10 @@ public class AdminServerCommand extends AdminCommand {
         );
     }
 
-    @Arg("edit @MSServer tag reset @MSTagDefinition")
-    public void onServerTagsClear(CommandSender sender, IBungeeServer server, TagDefinition definition) {
+    @Arg("edit @MSServer unset @MSTagDefinition")
+    public void onServerEditUnset(CommandSender sender, IBungeeServer server, TagDefinition definition) {
         server.resetTag(definition.getName());
-        sendMessage(sender, new ComponentBuilder("Reset Tag: ").color(ChatColor.AQUA)
+        sendMessage(sender, new ComponentBuilder("Unset Tag: ").color(ChatColor.AQUA)
                 .append(definition.getName()).color(ChatColor.WHITE)
                 .append(" = ").color(ChatColor.AQUA)
                 .append(definition.getDefaultValue()).color(ChatColor.WHITE)
