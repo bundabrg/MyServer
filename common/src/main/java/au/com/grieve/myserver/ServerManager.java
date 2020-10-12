@@ -43,7 +43,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -51,6 +53,8 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class ServerManager {
     public static ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
+
+    private CompletableFuture<List<Server>> getServersFuture;
 
     // Weak references to Servers (for since instance purposes)
     private final ConcurrentMap<UUID, Server> serverCache = new MapMaker()
@@ -99,34 +103,45 @@ public class ServerManager {
      * @return list of servers
      */
     public List<Server> getServers() {
-        List<Server> result = new ArrayList<>();
+        if (getServersFuture == null) {
+            getServersFuture = new CompletableFuture<>();
+            getMyServer().getScheduler().runAsync(() -> {
+                List<Server> result = new ArrayList<>();
 
-        if (!myServer.getConfig().getFolderConfig().getServersPath().toFile().exists()) {
-            return result;
-        }
-
-        try (Stream<Path> walk = Files.walk(myServer.getConfig().getFolderConfig().getServersPath(), 5)) {
-            Path lastPath = null;
-            for (Path path : walk
-                    .filter(Files::isDirectory)
-                    .filter(p -> p.resolve("server.yml").toFile().exists())
-                    .collect(Collectors.toList())) {
-
-                // If a server.yml file is found in a directory then prune out all child directories
-                if (lastPath == null || !path.startsWith(lastPath)) {
-                    lastPath = path;
-
-                    try {
-                        result.add(loadServer(path));
-                    } catch (IOException | NoSuchTemplateException | NoSuchServerException | InvalidServerException | InvalidTemplateException e) {
-                        e.printStackTrace();
-                    }
+                if (!myServer.getConfig().getFolderConfig().getServersPath().toFile().exists()) {
+                    getServersFuture.complete(result);
                 }
-            }
 
-        } catch (IOException e) {
-            e.printStackTrace();
+                try (Stream<Path> walk = Files.walk(myServer.getConfig().getFolderConfig().getServersPath(), 5)) {
+                    Path lastPath = null;
+                    for (Path path : walk
+                            .filter(Files::isDirectory)
+                            .filter(p -> p.resolve("server.yml").toFile().exists())
+                            .collect(Collectors.toList())) {
+
+                        // If a server.yml file is found in a directory then prune out all child directories
+                        if (lastPath == null || !path.startsWith(lastPath)) {
+                            lastPath = path;
+
+                            try {
+                                result.add(loadServer(path));
+                            } catch (IOException | NoSuchTemplateException | NoSuchServerException | InvalidServerException | InvalidTemplateException ignored) {
+                            }
+                        }
+                    }
+
+                } catch (IOException ignored) {
+                }
+                getServersFuture.complete(result);
+            });
         }
+
+        List<Server> result = new ArrayList<>();
+        try {
+            result.addAll(getServersFuture.get());
+        } catch (ExecutionException | InterruptedException ignored) {
+        }
+        getServersFuture = null;
         return result;
     }
 

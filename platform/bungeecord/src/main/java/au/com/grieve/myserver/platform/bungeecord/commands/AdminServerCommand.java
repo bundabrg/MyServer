@@ -29,7 +29,7 @@ import au.com.grieve.bcf.annotations.Command;
 import au.com.grieve.myserver.api.TagDefinition;
 import au.com.grieve.myserver.api.templates.server.IServerTemplate;
 import au.com.grieve.myserver.exceptions.InvalidServerException;
-import au.com.grieve.myserver.platform.bungeecord.BungeePlugin;
+import au.com.grieve.myserver.platform.bungeecord.MyServerPlugin;
 import au.com.grieve.myserver.platform.bungeecord.api.templates.server.IBungeeServer;
 import au.com.grieve.myserver.templates.server.Server;
 import net.md_5.bungee.api.ChatColor;
@@ -56,7 +56,7 @@ public class AdminServerCommand extends AdminCommand {
 
         cb.append("========= [ Servers ] =========").color(ChatColor.AQUA);
 
-        for (Server server : BungeePlugin.INSTANCE.getMyServer().getServerManager().getServers()) {
+        for (Server server : MyServerPlugin.INSTANCE.getMyServer().getServerManager().getServers()) {
             cb.append("\n").append(server.getName()).color(ChatColor.WHITE);
         }
 
@@ -66,22 +66,27 @@ public class AdminServerCommand extends AdminCommand {
 
     @Arg("create @string @MSTemplate(filter=server)")
     public void onCreate(CommandSender sender, String name, IServerTemplate template) {
-        try {
-            template.createServer(name);
-            sendMessage(sender, new ComponentBuilder("Created Server: " + name).color(ChatColor.AQUA).create());
-        } catch (InvalidServerException | IOException e) {
-            sendMessage(sender, new ComponentBuilder(e.getMessage()).color(ChatColor.RED).create());
-        }
+        MyServerPlugin.INSTANCE.getProxy().getScheduler().runAsync(MyServerPlugin.INSTANCE, () -> {
+            try {
+                sendMessage(sender, new ComponentBuilder("Initializing Server: " + name).color(ChatColor.AQUA).create());
+                template.createServer(name);
+                sendMessage(sender, new ComponentBuilder("Created Server: " + name).color(ChatColor.AQUA).create());
+            } catch (InvalidServerException | IOException e) {
+                sendMessage(sender, new ComponentBuilder(e.getMessage()).color(ChatColor.RED).create());
+            }
+        });
     }
 
-    @Arg("destroy @MSServer")
+    @Arg("delete @MSServer")
     public void onDestroy(CommandSender sender, IBungeeServer server) {
-        try {
-            server.destroy();
-            sendMessage(sender, new ComponentBuilder("Destroyed Server: " + server.getName()).create());
-        } catch (IOException e) {
-            sendMessage(sender, new ComponentBuilder(e.getMessage()).color(ChatColor.RED).create());
-        }
+        MyServerPlugin.INSTANCE.getProxy().getScheduler().runAsync(MyServerPlugin.INSTANCE, () -> {
+            try {
+                server.destroy();
+                sendMessage(sender, new ComponentBuilder("Deleted Server: " + server.getName()).create());
+            } catch (IOException e) {
+                sendMessage(sender, new ComponentBuilder(e.getMessage()).color(ChatColor.RED).create());
+            }
+        });
     }
 
     @Arg("info @MSServer")
@@ -114,23 +119,27 @@ public class AdminServerCommand extends AdminCommand {
 
     @Arg("start @MSServer")
     public void onServerStart(CommandSender sender, IBungeeServer server) {
-        try {
-            sendMessage(sender, new ComponentBuilder("Starting Server: ").color(ChatColor.AQUA)
-                    .append(server.getName()).color(ChatColor.WHITE).create());
-            server.start();
-        } catch (InvalidServerException | IOException e) {
-            sendMessage(sender, new ComponentBuilder(e.getMessage()).color(ChatColor.RED).create());
-        }
+        MyServerPlugin.INSTANCE.getProxy().getScheduler().runAsync(MyServerPlugin.INSTANCE, () -> {
+            try {
+                sendMessage(sender, new ComponentBuilder("Starting Server: ").color(ChatColor.AQUA)
+                        .append(server.getName()).color(ChatColor.WHITE).create());
+                server.start();
+            } catch (InvalidServerException | IOException e) {
+                sendMessage(sender, new ComponentBuilder(e.getMessage()).color(ChatColor.RED).create());
+            }
+        });
     }
 
     @Arg("stop @MSServer")
     public void onServerStop(CommandSender sender, IBungeeServer server) {
-        try {
-            sendMessage(sender, new ComponentBuilder("Stopping Server: ").color(ChatColor.AQUA)
-                    .append(server.getName()).color(ChatColor.WHITE).create());
-            server.stop();
-        } catch (InvalidServerException | IOException e) {
-            sendMessage(sender, new ComponentBuilder(e.getMessage()).color(ChatColor.RED).create());
-        }
+        MyServerPlugin.INSTANCE.getProxy().getScheduler().runAsync(MyServerPlugin.INSTANCE, () -> {
+            try {
+                sendMessage(sender, new ComponentBuilder("Stopping Server: ").color(ChatColor.AQUA)
+                        .append(server.getName()).color(ChatColor.WHITE).create());
+                server.stop();
+            } catch (InvalidServerException | IOException e) {
+                sendMessage(sender, new ComponentBuilder(e.getMessage()).color(ChatColor.RED).create());
+            }
+        });
     }
 }

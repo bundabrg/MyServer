@@ -46,8 +46,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.logging.Level;
 
 @Getter
-public class BungeePlugin extends Plugin {
-    public static BungeePlugin INSTANCE;
+public class MyServerPlugin extends Plugin {
+    public static MyServerPlugin INSTANCE;
 
     private BungeeCommandManager bcf;
     private BungeeMyServer myServer;

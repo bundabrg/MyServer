@@ -1,0 +1,16 @@
+# MyServer Template File
+
+# Template Name
+name: server/spigot/1.0/1.16.3
+
+# Template Description
+description: Create a Spigot server for Minecraft v1.16.3.
+
+# What other templates does this one inherit from
+parents:
+  - def/server/spigot/1.0
+
+# Vanilla Settings
+spigot:
+  version: 1.16.3
+  

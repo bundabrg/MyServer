@@ -30,9 +30,9 @@ vanilla: { }
 tags:
   # Memory for Java executable
   JAVA_MEMORY:
-    description: "Memory allocated to Server"
+    description: "Memory allocated to Server (GB)"
     required: true
-    default: 2
+    default: 1
     type: int
     permission: admin
 

@@ -36,7 +36,7 @@ import net.md_5.bungee.api.config.ServerInfo;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
 
 public class BungeeServerManager extends ServerManager {
 
@@ -97,14 +97,17 @@ public class BungeeServerManager extends ServerManager {
         server.setServerIp(null);
     }
 
-    public void serverPing(IBungeeServer server, Consumer<Boolean> consumer) {
+    public CompletableFuture<Boolean> serverPing(IBungeeServer server) {
         ServerInfo serverInfo = getMyServer().getPlugin().getProxy().getServers().get(server.getName());
+        CompletableFuture<Boolean> cf = new CompletableFuture<>();
         if (serverInfo == null) {
-            consumer.accept(false);
-            return;
+            cf.complete(false);
+            return cf;
         }
 
-        serverInfo.ping((serverPing, ex) -> consumer.accept(serverPing != null));
+        serverInfo.ping((serverPing, ex) -> cf.complete(serverPing != null));
+
+        return cf;
     }
 
     public BaseComponent[] statusToComponent(ServerStatus status) {

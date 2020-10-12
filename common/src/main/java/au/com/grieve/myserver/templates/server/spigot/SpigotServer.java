@@ -22,37 +22,30 @@
  * SOFTWARE.
  */
 
-package au.com.grieve.myserver.api.templates.server;
+package au.com.grieve.myserver.templates.server.spigot;
 
-import au.com.grieve.myserver.api.templates.ITagsTemplate;
-import au.com.grieve.myserver.exceptions.InvalidServerException;
+import au.com.grieve.myserver.SimpleTemplater;
 import au.com.grieve.myserver.templates.server.Server;
+import lombok.Getter;
+import lombok.ToString;
 
-import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
 
-public interface IServerTemplate extends ITagsTemplate {
-    Server createServer(String name) throws InvalidServerException, IOException;
+@Getter
+@ToString(callSuper = true)
+public abstract class SpigotServer extends Server {
+    public SpigotServer(SpigotTemplate template, Path serverPath) {
+        super(template, serverPath);
+    }
 
-    Server loadServer(Path serverPath) throws InvalidServerException, IOException;
+    @Override
+    public SpigotTemplate getTemplate() {
+        return (SpigotTemplate) super.getTemplate();
+    }
 
-    /**
-     * Create a new Server instance
-     *
-     * @return Server Instance
-     */
-    Server newServer(Path serverPath);
-
-    String getServerStartExecute();
-
-    List<String> getServerStartCommands();
-
-    int getServerStartDelay();
-
-    List<String> getServerStopCommands();
-
-    int getServerStopWait();
-
-    void prepareServer(IServer server) throws IOException;
+    @Override
+    protected SimpleTemplater newTemplater() {
+        return super.newTemplater()
+                .register("EXECUTABLE", "server.jar");
+    }
 }

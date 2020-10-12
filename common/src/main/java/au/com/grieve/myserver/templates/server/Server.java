@@ -59,7 +59,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 @Getter
 @ToString
@@ -264,6 +263,8 @@ public abstract class Server implements IServer {
                 throw new InvalidServerException("Server is already started.");
             case STARTING:
                 throw new InvalidServerException("Server is already starting.");
+            case INIT:
+                throw new InvalidServerException("Server is still initializing.");
             case ERROR:
                 // Reset Status
                 setStatus(ServerStatus.STOPPED);
@@ -273,8 +274,6 @@ public abstract class Server implements IServer {
                 throw new InvalidServerException("Server is not in a state to be started.");
         }
         try {
-            setStatus(ServerStatus.STARTING);
-
             // Start Server
             startServer();
 
@@ -299,16 +298,11 @@ public abstract class Server implements IServer {
                 throw new InvalidServerException("Server is not in a state to be started.");
         }
 
-        setStatus(ServerStatus.STOPPING);
-
         stopServer();
 
         // Remove reference to server
         getTemplate().getTemplateManager().getMyServer().getServerManager().getServerInstances().remove(getUuid());
     }
-
-    protected abstract void prepareServer() throws IOException;
-
 
     @Override
     public void destroy() throws IOException {
@@ -321,6 +315,7 @@ public abstract class Server implements IServer {
     }
 
     protected void startServer() throws InvalidServerException, IOException {
+        setStatus(ServerStatus.INIT);
         // Make sure required tags have a value
         for (Map.Entry<String, TagDefinition> entry : getTemplate().getTags().entrySet()) {
             if (entry.getValue().isRequired() && !tags.containsKey(entry.getKey()) && entry.getValue().getDefaultValue() == null) {
@@ -332,7 +327,9 @@ public abstract class Server implements IServer {
         updateFiles(ITagsTemplate.TemplateFileEnum.DYNAMIC);
 
         // Prepare Server
-        prepareServer();
+        getTemplate().prepareServer(this);
+
+        setStatus(ServerStatus.STARTING);
 
         SimpleTemplater st = newTemplater();
 
@@ -369,13 +366,11 @@ public abstract class Server implements IServer {
             @Override
             public void run() {
                 if (process != null) {
-                    serverPing((result) -> {
-                        if (!result) {
-                            getServerManager().getMyServer().getScheduler().schedule(this, 2, TimeUnit.SECONDS);
-                            return;
-                        }
-                        onServerStart();
-                    });
+                    if (!serverPing()) {
+                        getServerManager().getMyServer().getScheduler().schedule(this, 2, TimeUnit.SECONDS);
+                        return;
+                    }
+                    onServerStart();
                 }
             }
         }, 2, TimeUnit.SECONDS);
@@ -384,7 +379,7 @@ public abstract class Server implements IServer {
     /**
      * Return true if the server is up
      */
-    protected abstract void serverPing(Consumer<Boolean> callback);
+    protected abstract boolean serverPing();
 
     /**
      * Called when the server has finished starting
@@ -401,6 +396,8 @@ public abstract class Server implements IServer {
     protected abstract void handleOutput(String output);
 
     protected void stopServer() throws IOException, InvalidServerException {
+        setStatus(ServerStatus.STOPPING);
+
         // Send Stop Commands
         for (String command : getTemplate().getServerStopCommands()) {
             sendCommand(command);

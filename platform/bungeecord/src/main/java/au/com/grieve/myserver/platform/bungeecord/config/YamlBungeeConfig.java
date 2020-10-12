@@ -24,7 +24,7 @@
 
 package au.com.grieve.myserver.platform.bungeecord.config;
 
-import au.com.grieve.myserver.platform.bungeecord.BungeePlugin;
+import au.com.grieve.myserver.platform.bungeecord.MyServerPlugin;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -42,11 +42,11 @@ import java.nio.file.Path;
 public class YamlBungeeConfig implements BungeeConfig {
     public static ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
 
-    private final BungeePlugin plugin;
+    private final MyServerPlugin plugin;
     private final File configFile;
     private final JsonNode rootNode;
 
-    public YamlBungeeConfig(BungeePlugin plugin, File configFile) throws IOException {
+    public YamlBungeeConfig(MyServerPlugin plugin, File configFile) throws IOException {
         this.plugin = plugin;
         this.configFile = configFile;
         rootNode = MAPPER.readTree(configFile);

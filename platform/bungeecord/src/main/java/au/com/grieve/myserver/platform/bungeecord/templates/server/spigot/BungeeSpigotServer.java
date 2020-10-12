@@ -22,14 +22,14 @@
  * SOFTWARE.
  */
 
-package au.com.grieve.myserver.platform.bungeecord.templates.server.vanilla;
+package au.com.grieve.myserver.platform.bungeecord.templates.server.spigot;
 
 import au.com.grieve.myserver.exceptions.InvalidServerException;
 import au.com.grieve.myserver.platform.bungeecord.BungeeServerManager;
 import au.com.grieve.myserver.platform.bungeecord.api.templates.server.IBungeeServer;
 import au.com.grieve.myserver.platform.bungeecord.exceptions.PortNotFoundException;
-import au.com.grieve.myserver.templates.server.vanilla.VanillaServer;
-import au.com.grieve.myserver.templates.server.vanilla.VanillaTemplate;
+import au.com.grieve.myserver.templates.server.spigot.SpigotServer;
+import au.com.grieve.myserver.templates.server.spigot.SpigotTemplate;
 import lombok.Getter;
 import lombok.ToString;
 import net.md_5.bungee.api.ChatColor;
@@ -44,9 +44,9 @@ import java.util.concurrent.ExecutionException;
 
 @Getter
 @ToString(callSuper = true)
-public class BungeeVanillaServer extends VanillaServer implements IBungeeServer {
+public class BungeeSpigotServer extends SpigotServer implements IBungeeServer {
 
-    public BungeeVanillaServer(VanillaTemplate template, Path serverPath) {
+    public BungeeSpigotServer(SpigotTemplate template, Path serverPath) {
         super(template, serverPath);
     }
 

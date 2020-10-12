@@ -1,4 +1,4 @@
 name: MyServer
-main: au.com.grieve.myserver.platform.bungeecord.BungeePlugin
+main: au.com.grieve.myserver.platform.bungeecord.MyServerPlugin
 version: 1.1.0-dev
 author: bundabrg

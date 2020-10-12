@@ -26,7 +26,7 @@ package au.com.grieve.myserver.platform.bungeecord.commands;
 
 import au.com.grieve.bcf.annotations.Arg;
 import au.com.grieve.bcf.annotations.Command;
-import au.com.grieve.myserver.platform.bungeecord.BungeePlugin;
+import au.com.grieve.myserver.platform.bungeecord.MyServerPlugin;
 import au.com.grieve.myserver.platform.bungeecord.api.templates.IBungeeTemplate;
 import au.com.grieve.myserver.templates.server.ServerTemplate;
 import net.md_5.bungee.api.ChatColor;
@@ -51,7 +51,7 @@ public class AdminTemplateCommand extends MyServerCommand {
 
         cb.append("========= [ Templates ] =========").color(ChatColor.AQUA);
 
-        for (ServerTemplate template : BungeePlugin.INSTANCE.getMyServer().getTemplateManager().getTemplates(ServerTemplate.class)) {
+        for (ServerTemplate template : MyServerPlugin.INSTANCE.getMyServer().getTemplateManager().getTemplates(ServerTemplate.class)) {
             cb.append("\n").append(template.getName()).color(ChatColor.WHITE);
         }
 

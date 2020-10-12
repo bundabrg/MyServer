@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 @Getter
 @RequiredArgsConstructor
 public class BungeeTaskScheduler implements ITaskScheduler {
-    private final BungeePlugin plugin;
+    private final MyServerPlugin plugin;
     private final TaskScheduler realScheduler;
 
     @Override

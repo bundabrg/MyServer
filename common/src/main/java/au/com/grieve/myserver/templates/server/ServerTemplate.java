@@ -137,6 +137,7 @@ public abstract class ServerTemplate extends TagsTemplate implements IServerTemp
         server.setStatus(ServerStatus.STOPPED);
         server.save();
         server.updateFiles(TemplateFileEnum.STATIC);
+        prepareServer(server);
         return server;
     }
 

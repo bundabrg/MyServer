@@ -30,7 +30,7 @@ import au.com.grieve.bcf.CommandManager;
 import au.com.grieve.bcf.exceptions.ParserInvalidResultException;
 import au.com.grieve.bcf.parsers.SingleParser;
 import au.com.grieve.myserver.exceptions.NoSuchServerException;
-import au.com.grieve.myserver.platform.bungeecord.BungeePlugin;
+import au.com.grieve.myserver.platform.bungeecord.MyServerPlugin;
 import au.com.grieve.myserver.templates.server.Server;
 
 import java.util.List;
@@ -48,7 +48,7 @@ public class MSServer extends SingleParser {
     @Override
     protected Server result() throws ParserInvalidResultException {
         try {
-            return BungeePlugin.INSTANCE.getMyServer().getServerManager().getServer(getInput().toLowerCase());
+            return MyServerPlugin.INSTANCE.getMyServer().getServerManager().getServer(getInput().toLowerCase());
         } catch (NoSuchServerException ignored) {
         }
         throw new ParserInvalidResultException(this, "No such server");
@@ -56,7 +56,7 @@ public class MSServer extends SingleParser {
 
     @Override
     protected List<String> complete() {
-        return BungeePlugin.INSTANCE.getMyServer().getServerManager().getServers().stream()
+        return MyServerPlugin.INSTANCE.getMyServer().getServerManager().getServers().stream()
                 .map(Server::getName)
                 .filter(s -> s.toLowerCase().startsWith(getInput().toLowerCase()))
                 .limit(20)

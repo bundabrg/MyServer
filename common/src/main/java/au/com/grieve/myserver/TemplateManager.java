@@ -38,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -111,7 +112,7 @@ public class TemplateManager {
             return result;
         }
 
-        try (Stream<Path> walk = Files.walk(myServer.getConfig().getFolderConfig().getTemplatePath(), 5)) {
+        try (Stream<Path> walk = Files.walk(myServer.getConfig().getFolderConfig().getTemplatePath(), 10, FileVisitOption.FOLLOW_LINKS)) {
             Path lastPath = null;
             for (Path path : walk
                     .filter(Files::isDirectory)
