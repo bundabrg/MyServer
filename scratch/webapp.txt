@@ -1,0 +1,20 @@
+When a user types /msa, we display a clickable link that opens a management interface in a web browser.
+
+URL Format:
+    https://webapp.url/<unique id>/<confirm id>
+
+Where:
+    * unique id: A session ID provided by the web host.
+    * confirm id: An ID provided by MyServer
+
+----
+
+Steps:
+    * MyServer connects to server and starts a new session. A session id is provided by the server and a websocket is opened
+    * Websocket will timeout after a period of idle time.
+    * MyServer generates the confirm id and provides user the clickable URL
+    * User connects to WebApp.
+    * Server checks if unique id is valid. It will also check against the MyServer connection if the confirm id is valid.
+    * If valid a websocket is created to the User and the WebApp will simply proxy between the two connections.
+
+
