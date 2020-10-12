@@ -199,27 +199,29 @@ public abstract class VanillaTemplate extends ServerTemplate {
 
         // Copy files to a Temporary directory
         Path tmpDir = Files.createTempDirectory("vanilla");
-        Files.createDirectory(tmpDir.resolve("in"));
-        Files.createDirectory(tmpDir.resolve("out"));
-        FileUtils.copyFile(originalFile, tmpDir.resolve("in").resolve(getVersion() + ".jar").toFile());
-        FileUtils.copyFile(vanillacord.toFile(), tmpDir.resolve("vanillacord.jar").toFile());
-
-        // Execute Vanillacord
-        ProcessBuilder builder = new ProcessBuilder("java", "-jar", "vanillacord.jar", getVersion())
-                .inheritIO()
-                .directory(tmpDir.toFile());
-        Process process = builder.start();
         try {
-            process.waitFor(30, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            Files.createDirectory(tmpDir.resolve("in"));
+            Files.createDirectory(tmpDir.resolve("out"));
+            FileUtils.copyFile(originalFile, tmpDir.resolve("in").resolve(getVersion() + ".jar").toFile());
+            FileUtils.copyFile(vanillacord.toFile(), tmpDir.resolve("vanillacord.jar").toFile());
+
+            // Execute Vanillacord
+            ProcessBuilder builder = new ProcessBuilder("java", "-jar", "vanillacord.jar", getVersion())
+                    .inheritIO()
+                    .directory(tmpDir.toFile());
+            Process process = builder.start();
+            try {
+                process.waitFor(30, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            // Copy patched file
+            FileUtils.copyFile(tmpDir.resolve("out").resolve(getVersion() + "-bungee.jar").toFile(), patchedFile);
+        } finally {
+            // Clean up
+            FileUtils.deleteDirectory(tmpDir.toFile());
         }
-
-        // Copy patched file
-        FileUtils.copyFile(tmpDir.resolve("out").resolve(getVersion() + "-bungee.jar").toFile(), patchedFile);
-
-        // Clean up
-        FileUtils.deleteDirectory(tmpDir.toFile());
     }
 
 }

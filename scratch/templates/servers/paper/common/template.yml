@@ -1,0 +1,311 @@
+# MyServer Abstract Template File
+
+# Template Name
+name: def/server/paper/1.0
+
+# Server Settings
+server:
+  start:
+    # How to execute the server
+    execute: java -Xms{{JAVA_MEMORY}}G -Xmx{{JAVA_MEMORY}}G -Dmcname={{MC_SERVER_NAME}} -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M -XX:G1ReservePercent=20 -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1 -Dusing.aikars.flags=https://mcflags.emc.gs -Daikars.new.flags=true -jar {{EXECUTABLE}} nogui
+
+    # What commands to send to server after execution
+    commands: [ ]
+
+    # How long in seconds to delay till sending commands
+    delay: 5
+
+  stop:
+    # Commands to send to server to stop
+    commands:
+      - stop
+
+    # How long in seconds to wait for shutdown otherwise the server is murdered
+    wait: 60
+
+# Spigot Settings
+spigot: { }
+
+# Description of all Tags in Template
+tags:
+  # Memory for Java executable
+  JAVA_MEMORY:
+    description: "Memory allocated to Server"
+    required: true
+    default: 1
+    type: int
+    permission: admin
+
+  # Minecraft Special Settings
+  EULA:
+    description: "Agree to Minecraft EULA"
+    required: true
+    type: boolean
+    permission: owner
+
+  # Minecraft Settings
+  MC_SPAWN_PROTECTION:
+    description: "Spawn protection radius"
+    type: int
+    default: 0
+    permission: owner
+
+  MC_MAX_TICK_TIME:
+    description: "The maximum number of milliseconds a single tick may take before the server watchdog stops the server with the message"
+    type: int
+    default: -1
+    permission: admin
+
+  MC_SERVER_NAME:
+    description: "Server Name"
+    type: string
+    default: "Minecraft"
+    permission: owner
+
+  MC_GENERATOR_SETTINGS:
+    description: "The settings used to customize world generation."
+    type: string
+    default: ""
+    permission: owner
+
+  MC_FORCE_GAMEMODE:
+    description: "Force players to join in the default gamemode"
+    type: boolean
+    default: true
+    permission: owner
+
+  MC_ALLOW_NETHER:
+    description: "Allows players to travel to the Nether"
+    type: boolean
+    default: true
+    permission: owner
+
+  MC_ENFORCE_WHITELIST:
+    description: "Enforces the whitelist on the server."
+    type: boolean
+    default: false
+    permission: owner
+
+  MC_GAMEMODE:
+    description: "Sets the game mode for new players."
+    type: choice
+    choice:
+      - survival
+      - creative
+      - adventure
+      - spectator
+    default: survival
+    permission: owner
+
+  MC_BROADCAST_CONSOLE_TO_OPS:
+    description: "Send console command outputs to all online operators."
+    type: boolean
+    default: true
+    permission: owner
+
+  MC_ENABLE_QUERY:
+    description: "Enables GameSpy4 protocol server listener. Used to get information about server."
+    type: boolean
+    default: false
+    permission: admin
+
+  MC_PLAYER_IDLE_TIMEOUT:
+    description: "If non-zero, players are kicked from the server if they are idle for more than that many minutes."
+    type: int
+    default: 0
+    permission: owner
+
+  MC_DIFFICULTY:
+    description: "Sets the difficulty of the world."
+    type: choice
+    choice:
+      - peaceful
+      - easy
+      - normal
+      - hard
+    default: easy
+    permission: owner
+
+  MC_SPAWN_MONSTERS:
+    description: "Determines if monsters can spawn."
+    type: boolean
+    default: true
+    permission: owner
+
+  MC_OP_PERMISSION_LEVEL:
+    description: "Sets the default permission level for ops when using /op"
+    type: int
+    default: 4
+    permission: owner
+
+  MC_PVP:
+    description: "Enable PvP on the server."
+    type: boolean
+    default: true
+    permission: owner
+
+  MC_SNOOPER_ENABLED:
+    description: "Sets whether the server sends snoop data regularly to http://snoop.minecraft.net"
+    type: boolean
+    default: false
+    permission: admin
+
+  MC_LEVEL_TYPE:
+    description: "Determines the type of map that is generated."
+    type: choice
+    choice:
+      - FLAT
+      - LEGACY
+      - DEFAULT
+    default: DEFAULT
+    permission: owner
+
+  MC_HARDCORE:
+    description: "If set to true, server difficulty is ignored and set to hard and players are set to spectator mode if they die."
+    type: boolean
+    default: false
+    permission: owner
+
+  MC_ENABLE_COMMAND_BLOCK:
+    description: "Enables command blocks"
+    type: boolean
+    default: true
+    permission: owner
+
+  MC_MAX_PLAYERS:
+    description: "The maximum number of players that can play on the server at the same time."
+    type: int
+    default: 80
+    permission: owner
+
+  MC_NETWORK_COMPRESSION_THRESHOLD:
+    description: "Set network compression threshold"
+    type: int
+    default: -1
+    permission: admin
+
+  MC_RESOURCE_PACK_SHA1:
+    description: "Optional SHA-1 digest of the resource pack"
+    type: string
+    default: ""
+    permission: admin
+
+  MC_MAX_WORLD_SIZE:
+    description: "This sets the maximum possible size in blocks, expressed as a radius"
+    type: int
+    default: 29999984
+    permission: owner
+
+  MC_DEBUG:
+    description: "Enable debugging"
+    type: boolean
+    default: false
+    permission: admin
+
+  MC_SPAWN_NPCS:
+    description: "Determines whether villagers can spawn."
+    type: boolean
+    default: true
+    permission: owner
+
+  MC_ALLOW_FLIGHT:
+    description: "Allows users to use flight on the server while in Survival mode, if they have a mod that provides flight installed."
+    type: boolean
+    default: false
+    permission: owner
+
+  MC_LEVEL_NAME:
+    description: "The name of the main dimension"
+    type: string
+    default: "world"
+    permission: owner
+
+  MC_VIEW_DISTANCE:
+    description: "Sets the amount of world data the server sends the client"
+    type: int
+    default: 8
+    permission: owner
+
+  MC_RESOURCE_PACK:
+    description: "Optional URI to a resource pack"
+    type: string
+    default: ""
+    permission: admin
+
+  MC_SPAWN_ANIMALS:
+    description: "Determines if animals can spawn."
+    type: boolean
+    default: true
+    permission: owner
+
+  MC_WHITE_LIST:
+    description: "Enables a whitelist on the server."
+    type: boolean
+    default: false
+    permission: owner
+
+  MC_GENERATE_STRUCTURES:
+    description: "Defines whether structures (such as villages) can be generated."
+    type: boolean
+    default: true
+    permission: owner
+
+  MC_MAX_BUILD_HEIGHT:
+    description: "The maximum height allowed for building. Terrain may still naturally generate above a low height limit. 256 is the maximum possible, it also has to be a multiple of 8."
+    type: int
+    default: 256
+    permission: owner
+
+  MC_ONLINE_MODE:
+    description: "Server checks connecting players against Minecraft account database. "
+    type: boolean
+    default: false
+    permission: owner
+
+  MC_LEVEL_SEED:
+    description: "Use to randomize the world"
+    type: string
+    default: ""
+    permission: owner
+
+  MC_PREVENT_PROXY_CONNECTIONS:
+    description: "If the ISP/AS sent from the server is different from the one from Mojang's authentication server, the player is kicked"
+    type: boolean
+    default: false
+    permission: owner
+
+  MC_USE_NATIVE_TRANSPORT:
+    description: "Optimized packet sending/receiving on Linux"
+    type: boolean
+    default: true
+    permission: admin
+
+  MC_ENABLE_RCON:
+    decription: "Enables remote access to the server console."
+    type: boolean
+    default: false
+    permission: admin
+
+  MC_MOTD:
+    description: "This is the message that is displayed in the server list of the client, below the name."
+    type: string
+    default: "Welcome to {{MC_SERVER_NAME}}"
+    permission: owner
+
+# Which files to treat as templates relative to the `files` folder
+templates:
+  # Static Template files are parsed only when the server is initially created
+  static: [ ]
+
+  # Dynamic Template files are parsed each time the server is started
+  dynamic:
+    - eula.txt
+    - server.properties
+
+# Triggers are performed when text is received that match a trigger. The command is sent to the console of the server. Tags can
+# be used as well
+triggers:
+  notify_join:
+    match: 'UUID of player (\w+)'
+    commands:
+      - 'tellraw $1 ["",{"text":"Welcome to "},{"text":"{{MC_SERVER_NAME}}","color":"red"}]'
