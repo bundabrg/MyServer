@@ -27,6 +27,7 @@ package au.com.grieve.myserver.platform.bungeecord.commands;
 import au.com.grieve.bcf.annotations.Arg;
 import au.com.grieve.bcf.annotations.Command;
 import au.com.grieve.myserver.api.TagDefinition;
+import au.com.grieve.myserver.api.templates.server.IServer;
 import au.com.grieve.myserver.api.templates.server.IServerTemplate;
 import au.com.grieve.myserver.exceptions.InvalidServerException;
 import au.com.grieve.myserver.platform.bungeecord.MyServerPlugin;
@@ -56,7 +57,7 @@ public class AdminServerCommand extends AdminCommand {
 
         cb.append("========= [ Servers ] =========").color(ChatColor.AQUA);
 
-        for (Server server : MyServerPlugin.INSTANCE.getMyServer().getServerManager().getServers()) {
+        for (IServer server : MyServerPlugin.INSTANCE.getMyServer().getServerManager().getServers()) {
             cb.append("\n").append(server.getName()).color(ChatColor.WHITE);
         }
 
@@ -82,7 +83,8 @@ public class AdminServerCommand extends AdminCommand {
         MyServerPlugin.INSTANCE.getProxy().getScheduler().runAsync(MyServerPlugin.INSTANCE, () -> {
             try {
                 server.destroy();
-                sendMessage(sender, new ComponentBuilder("Deleted Server: " + server.getName()).create());
+                sendMessage(sender, new ComponentBuilder("Deleted Server: ").color(ChatColor.AQUA)
+                        .append(server.getName()).color(ChatColor.WHITE).create());
             } catch (IOException e) {
                 sendMessage(sender, new ComponentBuilder(e.getMessage()).color(ChatColor.RED).create());
             }
@@ -124,6 +126,8 @@ public class AdminServerCommand extends AdminCommand {
                 sendMessage(sender, new ComponentBuilder("Starting Server: ").color(ChatColor.AQUA)
                         .append(server.getName()).color(ChatColor.WHITE).create());
                 server.start();
+//                sendMessage(sender, new ComponentBuilder("Server Started: ").color(ChatColor.AQUA)
+//                        .append(server.getName()).color(ChatColor.WHITE).create());
             } catch (InvalidServerException | IOException e) {
                 sendMessage(sender, new ComponentBuilder(e.getMessage()).color(ChatColor.RED).create());
             }
@@ -137,6 +141,8 @@ public class AdminServerCommand extends AdminCommand {
                 sendMessage(sender, new ComponentBuilder("Stopping Server: ").color(ChatColor.AQUA)
                         .append(server.getName()).color(ChatColor.WHITE).create());
                 server.stop();
+//                sendMessage(sender, new ComponentBuilder("Server Stopped: ").color(ChatColor.AQUA)
+//                        .append(server.getName()).color(ChatColor.WHITE).create());
             } catch (InvalidServerException | IOException e) {
                 sendMessage(sender, new ComponentBuilder(e.getMessage()).color(ChatColor.RED).create());
             }

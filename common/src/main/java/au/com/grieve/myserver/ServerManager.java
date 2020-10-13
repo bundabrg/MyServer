@@ -24,6 +24,7 @@
 
 package au.com.grieve.myserver;
 
+import au.com.grieve.myserver.api.templates.server.IServer;
 import au.com.grieve.myserver.exceptions.InvalidServerException;
 import au.com.grieve.myserver.exceptions.InvalidTemplateException;
 import au.com.grieve.myserver.exceptions.NoSuchServerException;
@@ -54,15 +55,15 @@ import java.util.stream.Stream;
 public class ServerManager {
     public static ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
 
-    private CompletableFuture<List<Server>> getServersFuture;
+    private CompletableFuture<List<IServer>> getServersFuture;
 
     // Weak references to Servers (for since instance purposes)
-    private final ConcurrentMap<UUID, Server> serverCache = new MapMaker()
+    private final ConcurrentMap<UUID, IServer> serverCache = new MapMaker()
             .weakValues()
             .makeMap();
 
     // Strong references to Servers
-    private final ConcurrentMap<UUID, Server> serverInstances = new MapMaker()
+    private final ConcurrentMap<UUID, IServer> serverInstances = new MapMaker()
             .makeMap();
 
     private final MyServer myServer;
@@ -83,14 +84,14 @@ public class ServerManager {
                 .anyMatch(s -> s.getUuid().equals(uuid));
     }
 
-    public Server getServer(String name) throws NoSuchServerException {
+    public IServer getServer(String name) throws NoSuchServerException {
         return getServers().stream()
                 .filter(s -> s.getName().equals(name))
                 .findFirst()
                 .orElseThrow(() -> new NoSuchServerException("No such server name: " + name));
     }
 
-    public Server getServer(UUID uuid) throws NoSuchServerException {
+    public IServer getServer(UUID uuid) throws NoSuchServerException {
         return getServers().stream()
                 .filter(s -> s.getUuid().equals(uuid))
                 .findFirst()
@@ -102,14 +103,16 @@ public class ServerManager {
      *
      * @return list of servers
      */
-    public List<Server> getServers() {
+    public List<IServer> getServers() {
         if (getServersFuture == null) {
-            getServersFuture = new CompletableFuture<>();
+            CompletableFuture<List<IServer>> getServersFuture = new CompletableFuture<>();
+            this.getServersFuture = getServersFuture;
             getMyServer().getScheduler().runAsync(() -> {
-                List<Server> result = new ArrayList<>();
+                List<IServer> result = new ArrayList<>();
 
                 if (!myServer.getConfig().getFolderConfig().getServersPath().toFile().exists()) {
                     getServersFuture.complete(result);
+                    return;
                 }
 
                 try (Stream<Path> walk = Files.walk(myServer.getConfig().getFolderConfig().getServersPath(), 5)) {
@@ -136,7 +139,7 @@ public class ServerManager {
             });
         }
 
-        List<Server> result = new ArrayList<>();
+        List<IServer> result = new ArrayList<>();
         try {
             result.addAll(getServersFuture.get());
         } catch (ExecutionException | InterruptedException ignored) {
@@ -150,7 +153,7 @@ public class ServerManager {
      *
      * @param serverPath Path to server folder
      */
-    public Server loadServer(Path serverPath) throws IOException, NoSuchTemplateException, NoSuchServerException, InvalidServerException, InvalidTemplateException {
+    public IServer loadServer(Path serverPath) throws IOException, NoSuchTemplateException, NoSuchServerException, InvalidServerException, InvalidTemplateException {
         JsonNode rootNode = MAPPER.readTree(serverPath.resolve("server.yml").toFile());
 
         if (!rootNode.has("uuid")) {

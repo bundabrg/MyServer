@@ -31,6 +31,7 @@ import au.com.grieve.bcf.Parser;
 import au.com.grieve.bcf.exceptions.ParserInvalidResultException;
 import au.com.grieve.bcf.parsers.SingleParser;
 import au.com.grieve.myserver.api.TagDefinition;
+import au.com.grieve.myserver.api.templates.server.IServer;
 import au.com.grieve.myserver.templates.server.Server;
 import com.google.common.collect.Lists;
 
@@ -51,7 +52,7 @@ public class MSTagDefinition extends SingleParser {
         super(manager, argNode, context);
     }
 
-    protected Server getServer() throws ParserInvalidResultException {
+    protected IServer getServer() throws ParserInvalidResultException {
         for (Parser parser : Lists.reverse(context.getParsers())) {
             if (parser instanceof MSServer) {
                 return ((MSServer) parser).result();
@@ -62,7 +63,7 @@ public class MSTagDefinition extends SingleParser {
 
     @Override
     protected TagDefinition result() throws ParserInvalidResultException {
-        Server server = getServer();
+        IServer server = getServer();
         if (server.getTemplate().getTags().containsKey(getInput())) {
             return server.getTemplate().getTags().get(getInput());
         }
@@ -72,7 +73,7 @@ public class MSTagDefinition extends SingleParser {
     @Override
     protected List<String> complete() {
         try {
-            Server server = getServer();
+            IServer server = getServer();
             return server.getTemplate().getTags().keySet().stream()
                     .filter(s -> s.startsWith(getInput()))
                     .limit(20)
