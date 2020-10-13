@@ -25,6 +25,7 @@
 package au.com.grieve.myserver.api.templates.server;
 
 import au.com.grieve.myserver.ServerManager;
+import au.com.grieve.myserver.api.ServerStatus;
 import au.com.grieve.myserver.exceptions.InvalidServerException;
 import au.com.grieve.myserver.templates.server.ServerTemplate;
 
@@ -84,4 +85,11 @@ public interface IServer {
      * @param command command to send
      */
     void sendCommand(String command) throws InvalidServerException, IOException;
+
+    /**
+     * Return the server status
+     *
+     * @return the server status
+     */
+    ServerStatus getStatus();
 }

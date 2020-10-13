@@ -27,9 +27,16 @@ package au.com.grieve.myserver.platform.bungeecord.commands;
 import au.com.grieve.bcf.annotations.Arg;
 import au.com.grieve.bcf.annotations.Command;
 import au.com.grieve.bcf.platform.bungeecord.BungeeCommand;
+import au.com.grieve.myserver.api.ServerStatus;
+import au.com.grieve.myserver.exceptions.InvalidServerException;
+import au.com.grieve.myserver.platform.bungeecord.MyServerPlugin;
+import au.com.grieve.myserver.platform.bungeecord.api.templates.server.IBungeeServer;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
+
+import java.io.IOException;
 
 @Command("myserver|ms")
 //@Permission("myserver.*")
@@ -47,11 +54,33 @@ public class MyServerCommand extends BungeeCommand {
 //        );
 //    }
 
-    @Arg("help")
-    public void onHelp(CommandSender sender) {
-        sender.sendMessage(
-                new ComponentBuilder("========= [ Test ] =========").color(ChatColor.AQUA).create()
-        );
+    @Arg("@MSServer")
+    public void onConnect(CommandSender sender, IBungeeServer server) {
+        if (!(sender instanceof ProxiedPlayer)) {
+            sendMessage(sender, new ComponentBuilder("You need to be a player!").color(ChatColor.RED).create());
+            return;
+        }
+
+        ProxiedPlayer player = (ProxiedPlayer) sender;
+
+        MyServerPlugin.INSTANCE.getProxy().getScheduler().runAsync(MyServerPlugin.INSTANCE, () -> {
+            // Send player immediately if server is started
+            if (server.getStatus().equals(ServerStatus.STARTED)) {
+                server.send(player);
+                return;
+            }
+
+            // Start server and then send player
+            try {
+                sendMessage(sender, new ComponentBuilder("Please wait whilst server starts: ").color(ChatColor.AQUA)
+                        .append(server.getName()).color(ChatColor.WHITE).create());
+                server.start();
+                server.send(player);
+            } catch (InvalidServerException | IOException e) {
+                sendMessage(sender, new ComponentBuilder("Server failed to start: ").color(ChatColor.RED)
+                        .append(server.getName()).color(ChatColor.WHITE).create());
+            }
+        });
     }
 
 }

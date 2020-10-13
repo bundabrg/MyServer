@@ -32,6 +32,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.config.ServerInfo;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -108,6 +109,11 @@ public class BungeeServerManager extends ServerManager {
         serverInfo.ping((serverPing, ex) -> cf.complete(serverPing != null));
 
         return cf;
+    }
+
+    public void send(IBungeeServer server, ProxiedPlayer player) {
+
+
     }
 
     public BaseComponent[] statusToComponent(ServerStatus status) {

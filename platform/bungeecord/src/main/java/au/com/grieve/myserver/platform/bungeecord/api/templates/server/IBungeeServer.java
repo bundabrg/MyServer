@@ -25,7 +25,9 @@
 package au.com.grieve.myserver.platform.bungeecord.api.templates.server;
 
 import au.com.grieve.myserver.api.templates.server.IServer;
+import au.com.grieve.myserver.platform.bungeecord.BungeeServerManager;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 public interface IBungeeServer extends IServer {
     /**
@@ -34,5 +36,16 @@ public interface IBungeeServer extends IServer {
      * @return BaseComponent info
      */
     BaseComponent[] bungeeGetInfo();
+
+    BungeeServerManager getServerManager();
+
+    /**
+     * Send player to server
+     *
+     * @param player the player to send
+     */
+    default void send(ProxiedPlayer player) {
+        getServerManager().send(this, player);
+    }
 
 }
