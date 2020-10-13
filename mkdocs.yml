@@ -8,8 +8,7 @@ edit_uri: ""
 copyright: 'Copyright (C) 2020 MyServer Developers'
 
 extra_css:
-  - 'css/mkpdf.css'
-#  - 'css/version_select.css'
+  - 'css/mkdocs.css'
 
 #extra_javascript:
 #  - 'js/version_select.js'
@@ -24,8 +23,6 @@ theme:
     accent: 'indigo'
   features:
     - instant
-
-
 
 # See the following for docs on these extensions: https://squidfunk.github.io/mkdocs-material/extensions
 markdown_extensions:
@@ -53,26 +50,18 @@ markdown_extensions:
 #  - footnotes
 #  - metadata
 
-# Bundie's Tip: Disable mkpdfs whilst using `mkdocs serve` on a local machine
 plugins:
   - search
   - exclude:
       glob:
         - 'theme/*'
-#  - git-revision-date-localized:
-#      type: timeago
-#  - mkpdfs:
-#      author: MyServer Developers
-#      toc_title: Table of contents
-#      output_path: pdf/documentation.pdf
-#      design: docs/css/pdf.css
-
-# Discord not yet supported but it will be soon
-#extra:
-#  social:
-#    - type: discord
-#      link: https://discord.gg/blahblah
 
 nav:
   - Introduction: index.md
+  - Template System:
+      - Overview: template-system/overview.md
+      - Servers:
+          - Overview: template-system/servers/overview.md
+          - Paper:
+              - 1.0: template-system/servers/paper/paper-1.0.md
   - Contributing: contributing.md
