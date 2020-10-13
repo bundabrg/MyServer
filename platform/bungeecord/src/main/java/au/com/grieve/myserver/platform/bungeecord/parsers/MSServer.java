@@ -29,9 +29,9 @@ import au.com.grieve.bcf.CommandContext;
 import au.com.grieve.bcf.CommandManager;
 import au.com.grieve.bcf.exceptions.ParserInvalidResultException;
 import au.com.grieve.bcf.parsers.SingleParser;
+import au.com.grieve.myserver.api.templates.server.IServer;
 import au.com.grieve.myserver.exceptions.NoSuchServerException;
 import au.com.grieve.myserver.platform.bungeecord.MyServerPlugin;
-import au.com.grieve.myserver.templates.server.Server;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,7 +46,7 @@ public class MSServer extends SingleParser {
     }
 
     @Override
-    protected Server result() throws ParserInvalidResultException {
+    protected IServer result() throws ParserInvalidResultException {
         try {
             return MyServerPlugin.INSTANCE.getMyServer().getServerManager().getServer(getInput().toLowerCase());
         } catch (NoSuchServerException ignored) {
@@ -57,7 +57,7 @@ public class MSServer extends SingleParser {
     @Override
     protected List<String> complete() {
         return MyServerPlugin.INSTANCE.getMyServer().getServerManager().getServers().stream()
-                .map(Server::getName)
+                .map(IServer::getName)
                 .filter(s -> s.toLowerCase().startsWith(getInput().toLowerCase()))
                 .limit(20)
                 .collect(Collectors.toList());

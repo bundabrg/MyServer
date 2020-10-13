@@ -107,14 +107,13 @@ public abstract class PaperTemplate extends ServerTemplate {
         }
 
         try {
-            if (this.updateServerFuture.get()) {
-                // Copy to our files area (done all the time in case the server is updated)
-                Path cacheFolder = getTemplateManager().getMyServer().getConfig().getFolderConfig().getCachePath();
-                Path cachedServerPath = cacheFolder.resolve("servers").resolve("paper").resolve(getVersion());
+            this.updateServerFuture.get();
+            // Copy to our files area (done all the time in case the server is updated)
+            Path cacheFolder = getTemplateManager().getMyServer().getConfig().getFolderConfig().getCachePath();
+            Path cachedServerPath = cacheFolder.resolve("servers").resolve("paper").resolve(getVersion());
 
-                Path executable = server.getServerPath().resolve("files").resolve("server.jar");
-                FileUtils.copyFile(cachedServerPath.resolve("paper-" + getVersion() + ".jar").toFile(), executable.toFile());
-            }
+            Path executable = server.getServerPath().resolve("files").resolve("server.jar");
+            FileUtils.copyFile(cachedServerPath.resolve("paper-" + getVersion() + ".jar").toFile(), executable.toFile());
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         } finally {

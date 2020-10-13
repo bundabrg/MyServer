@@ -28,15 +28,16 @@ import au.com.grieve.bcf.annotations.Arg;
 import au.com.grieve.bcf.annotations.Command;
 import au.com.grieve.myserver.platform.bungeecord.MyServerPlugin;
 import au.com.grieve.myserver.platform.bungeecord.api.templates.IBungeeTemplate;
-import au.com.grieve.myserver.templates.server.ServerTemplate;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 
+import java.util.List;
+
 @Command("msat")
 @Arg("template|t")
 //@Permission("myserver.*")
-public class AdminTemplateCommand extends MyServerCommand {
+public class AdminTemplateCommand extends AdminCommand {
 
     @Arg("help")
     public void onHelp(CommandSender sender) {
@@ -51,11 +52,16 @@ public class AdminTemplateCommand extends MyServerCommand {
 
         cb.append("========= [ Templates ] =========").color(ChatColor.AQUA);
 
-        for (ServerTemplate template : MyServerPlugin.INSTANCE.getMyServer().getTemplateManager().getTemplates(ServerTemplate.class)) {
-            cb.append("\n").append(template.getName()).color(ChatColor.WHITE);
+        List<IBungeeTemplate> templates = MyServerPlugin.INSTANCE.getMyServer().getTemplateManager().getTemplates(IBungeeTemplate.class);
+
+        if (templates.size() > 0) {
+            for (IBungeeTemplate template : templates) {
+                cb.append("\n").append(template.getName()).color(ChatColor.WHITE);
+            }
+        } else {
+            cb.append("\nNone Found").color(ChatColor.YELLOW);
         }
 
-        cb.append("\n=================================").color(ChatColor.AQUA);
         sendMessage(sender, cb.create());
     }
 

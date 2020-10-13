@@ -27,7 +27,6 @@ package au.com.grieve.myserver;
 import au.com.grieve.myserver.api.templates.ITemplate;
 import au.com.grieve.myserver.exceptions.InvalidTemplateException;
 import au.com.grieve.myserver.exceptions.NoSuchTemplateException;
-import au.com.grieve.myserver.templates.Template;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -75,7 +74,7 @@ public class TemplateManager {
      * @param <T>       Type of template
      * @return the returned template else null
      */
-    public <T extends Template> T getTemplate(Class<T> typeClass, String name) throws NoSuchTemplateException, InvalidTemplateException, IOException {
+    public <T extends ITemplate> T getTemplate(Class<T> typeClass, String name) throws NoSuchTemplateException, InvalidTemplateException, IOException {
         // Check if we already have an instance in use
         if (templateInstances.containsKey(name)) {
             //noinspection unchecked
@@ -148,8 +147,7 @@ public class TemplateManager {
      * @param <T>       Type of Template
      * @return Array of Templates
      */
-    @SuppressWarnings("unused")
-    public <T extends Template> List<T> getTemplates(Class<T> typeClass) {
+    public <T extends ITemplate> List<T> getTemplates(Class<T> typeClass) {
         List<T> result = new ArrayList<>();
 
         for (Map.Entry<String, Path> entry : getTemplatePaths().entrySet()) {

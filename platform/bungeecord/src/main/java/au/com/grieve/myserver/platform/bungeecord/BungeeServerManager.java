@@ -62,6 +62,7 @@ public class BungeeServerManager extends ServerManager {
         int amount = getMyServer().getConfig().getBungeecord().getPortAmount();
         for (int port = startPort; port < startPort + amount; port++) {
             if (!reservedPorts.contains(port)) {
+                reservedPorts.add(port);
                 return port;
             }
         }
