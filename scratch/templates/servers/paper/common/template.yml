@@ -23,8 +23,8 @@ server:
     # How long in seconds to wait for shutdown otherwise the server is murdered
     wait: 60
 
-# Spigot Settings
-spigot: { }
+# Paper Settings
+paper: { }
 
 # Description of all Tags in Template
 tags:

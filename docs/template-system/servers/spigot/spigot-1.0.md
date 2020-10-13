@@ -1,11 +1,11 @@
 # Paper v1.0
-Provides a [PaperMC](https://papermc.io/) server.
+Provides a [SpigotMC](https://spigotmc.org/) server.
 
 
 ## Template Summary
 
 * The template file should be called `template.yml` and exist somewhere under MyServer's `templates` folder.
-* The name field should start with `server/paper/1.0`. 
+* The name field should start with `server/spigot/1.0`. 
 * If a `files` folder exists in the same folder as `template.yml` it will be copied to the newly created
 server location. 
 * Anything listed as a dynamic template file will be copied each time the server starts and additionally be parsed for 
@@ -24,7 +24,7 @@ tags and replaced with the tag value.
 
 ```yaml
 # Template Name
-name: server/paper/1.0/...
+name: server/spigot/1.0/...
 
 # Description of Template
 description: My description
@@ -54,13 +54,10 @@ server:
     # How long in seconds to wait for shutdown otherwise the server is murdered
     wait: 60 
 
-# Paper Settings
-paper:
-  # Version of the Paper Server Desired
+# Spigot Settings
+spigot:
+  # Version of the Spigot Server Desired
   version: 1.16.3
-
-  # URL of paperclip that provides the above version
-  url: "https://papermc.io/ci/job/Paper-1.16/228/artifact/paperclip-228.jar"
 
 # Tag definitions - Define all tags here
 tags:

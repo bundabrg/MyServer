@@ -64,4 +64,8 @@ nav:
           - Overview: template-system/servers/overview.md
           - Paper:
               - 1.0: template-system/servers/paper/paper-1.0.md
+          - Spigot:
+              - 1.0: template-system/servers/spigot/spigot-1.0.md
+          - Vanilla:
+              - 1.0: template-system/servers/vanilla/vanilla-1.0.md
   - Contributing: contributing.md
