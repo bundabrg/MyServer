@@ -1,0 +1,9 @@
+# MyServer - Paper Common Settings
+
+# Type of Template
+name: abstract:server/paper/common@1.0.0
+
+# Parent templates we inherit from. Later options override earlier. Format: [template_type:]template_name[@template_version]
+parents:
+  - abstract:server/common/minecraft-tags@1.0.0
+  - abstract:server/common/aikar-flags@1.0.0

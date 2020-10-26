@@ -31,7 +31,7 @@ import au.com.grieve.myserver.platform.bungeecord.config.BungeeConfig;
 import au.com.grieve.myserver.platform.bungeecord.templates.server.paper.BungeePaperTemplate;
 import au.com.grieve.myserver.platform.bungeecord.templates.server.spigot.BungeeSpigotTemplate;
 import au.com.grieve.myserver.platform.bungeecord.templates.server.vanilla.BungeeVanillaTemplate;
-import au.com.grieve.myserver.templates.definition.DefinitionTemplate;
+import au.com.grieve.myserver.templates.definition.AbstractTemplate;
 import lombok.Getter;
 
 @Getter
@@ -50,7 +50,7 @@ public class BungeeMyServer extends MyServer {
 
     protected void registerBuiltinTemplateTypes() {
         getTemplateManager()
-                .registerTemplateType("def", DefinitionTemplate.class)
+                .registerTemplateType("abstract", AbstractTemplate.class)
                 .registerTemplateType("server/paper/1.0", BungeePaperTemplate.class)
                 .registerTemplateType("server/spigot/1.0", BungeeSpigotTemplate.class)
                 .registerTemplateType("server/vanilla/1.0", BungeeVanillaTemplate.class);

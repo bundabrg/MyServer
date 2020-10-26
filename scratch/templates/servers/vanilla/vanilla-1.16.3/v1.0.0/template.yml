@@ -1,0 +1,15 @@
+# MyServer - Vanilla Server Template File
+
+# Template Name
+name: server/vanilla/1.0:vanilla-1.16.3@1.0.0
+
+# Template Description
+description: Create a Vanilla server for Minecraft v1.16.3. No mods or plugins.
+
+# What other templates does this one inherit from
+parents:
+  - abstract:server/vanilla/common@1.0.0
+
+# Vanilla Settings
+vanilla:
+  version: 1.16.3

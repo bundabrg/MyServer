@@ -39,10 +39,10 @@ import java.nio.file.Path;
  */
 @Getter
 @ToString
-public class DefinitionTemplate extends Template {
+public class AbstractTemplate extends Template {
 
 
-    public DefinitionTemplate(TemplateManager templateManager, Path templatePath) throws NoSuchTemplateException, InvalidTemplateException, IOException {
+    public AbstractTemplate(TemplateManager templateManager, Path templatePath) throws NoSuchTemplateException, InvalidTemplateException, IOException {
         super(templateManager, templatePath);
     }
 }

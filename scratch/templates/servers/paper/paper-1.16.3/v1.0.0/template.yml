@@ -1,0 +1,16 @@
+# MyServer - Paper Server Template File
+
+# Template Name
+name: server/paper/1.0:paper-1.16.3@1.0.0
+
+# Template Description
+description: Create a Paper server for Minecraft v1.16.3.
+
+# What other templates does this one inherit from
+parents:
+  - abstract:server/paper/common@1.0.0
+
+# Paper Settings
+paper:
+  version: 1.16.3
+  url: "https://papermc.io/ci/job/Paper-1.16/228/artifact/paperclip-228.jar"

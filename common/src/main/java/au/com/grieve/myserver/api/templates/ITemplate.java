@@ -41,6 +41,10 @@ public interface ITemplate {
 
     String getName();
 
+    String getType();
+
+    String getVersion();
+
     String getDescription();
 
     List<ITemplate> getParents();

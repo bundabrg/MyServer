@@ -38,6 +38,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Getter
 @ToString
@@ -47,7 +49,11 @@ public abstract class Template implements ITemplate {
     private final TemplateManager templateManager;
     private final Path templatePath;
     private final JsonNode node;
+
+    private final String type;
     private final String name;
+    private final String version;
+
     private final String description;
     private final List<ITemplate> parents = new ArrayList<>();
 
@@ -59,7 +65,15 @@ public abstract class Template implements ITemplate {
         if (!node.has("name")) {
             throw new InvalidTemplateException("Missing field: name");
         }
-        this.name = node.get("name").asText();
+
+        Pattern p = Pattern.compile("([^:]+):([^@]+)@(.+)");
+        Matcher m = p.matcher(node.get("name").asText());
+        if (!m.find()) {
+            throw new InvalidTemplateException("Invalid name format: " + node.get("name"));
+        }
+        this.type = m.group(1);
+        this.name = m.group(2);
+        this.version = m.group(3);
 
         this.description = node.has("description") ? node.get("description").asText() : "";
         if (node.has("parents")) {

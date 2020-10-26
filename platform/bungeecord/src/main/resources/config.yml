@@ -11,6 +11,9 @@ folder:
   # Servers folder
   instances: servers
 
+repositories:
+  - https://bundabrg.github.io/MyServerTemplates/development
+
 # Server Config
 bungeecord:
   ip-listen: 127.0.0.1

@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -57,6 +58,8 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class TemplateManager {
     public static ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
+    public static Pattern TEMPLATE_FULL_PATTERN = Pattern.compile("([^:]+):([^@]+)@(.+)");
+    public static Pattern TEMPLATE_PARTIAL_PATTERN = Pattern.compile("([^:]+):(.+)");
 
     private final Map<String, Class<? extends ITemplate>> registeredTemplateTypes = new HashMap<>();
     private final ConcurrentMap<String, ITemplate> templateInstances = new MapMaker()
@@ -68,6 +71,10 @@ public class TemplateManager {
 
     /**
      * Return a template by name
+     * <p>
+     * The name is in the format:  type:name@version
+     * <p>
+     * The version can be left off to return the latest version
      *
      * @param typeClass Type of template
      * @param name      Name of the template
