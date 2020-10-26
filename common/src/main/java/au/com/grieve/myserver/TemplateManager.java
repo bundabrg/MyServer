@@ -24,21 +24,18 @@
 
 package au.com.grieve.myserver;
 
+import au.com.grieve.myserver.api.ITemplateDefinition;
+import au.com.grieve.myserver.api.ITemplateLoader;
 import au.com.grieve.myserver.api.templates.ITemplate;
 import au.com.grieve.myserver.exceptions.InvalidTemplateException;
 import au.com.grieve.myserver.exceptions.NoSuchTemplateException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.MapMaker;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.FileVisitOption;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,27 +44,57 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Management Class for Templates
  */
 @Getter
-@RequiredArgsConstructor
 public class TemplateManager {
+    public static TemplateManager INSTANCE;
     public static ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
-    public static Pattern TEMPLATE_FULL_PATTERN = Pattern.compile("([^:]+):([^@]+)@(.+)");
-    public static Pattern TEMPLATE_PARTIAL_PATTERN = Pattern.compile("([^:]+):(.+)");
+//    public static Pattern TEMPLATE_FULL_PATTERN = Pattern.compile("([^:]+):([^@]+)@(.+)");
+//    public static Pattern TEMPLATE_PARTIAL_PATTERN = Pattern.compile("([^:]+):(.+)");
 
+    // Types of Templates Supported
     private final Map<String, Class<? extends ITemplate>> registeredTemplateTypes = new HashMap<>();
+
+    // Types of TemplateLoaders Supported
+    private final Map<String, ITemplateLoader> registeredTemplateLoaders = new HashMap<>();
+
+    // Templates that currently exist in memory (singleton)
     private final ConcurrentMap<String, ITemplate> templateInstances = new MapMaker()
             .weakValues()
             .makeMap();
     private final Queue<String> templateLocks = new ConcurrentLinkedQueue<>();
 
     private final MyServer myServer;
+
+    public TemplateManager(MyServer myServer) {
+        INSTANCE = this;
+        this.myServer = myServer;
+    }
+
+    /**
+     * Return list of unloaded templates that match the partial name
+     *
+     * @param name Partial name of template in form type:name@version
+     * @return list of matching unloaded templates
+     */
+    public List<ITemplateDefinition> findTemplatesByName(String name) {
+        List<ITemplateDefinition> result = new ArrayList<>();
+        for (ITemplateLoader templateLoader : getRegisteredTemplateLoaders().values()) {
+            result.addAll(templateLoader.findTemplatesByName(name));
+        }
+        return result;
+    }
+
+    public <T extends ITemplate> T loadTemplate(Class<T> templateClass, String name) throws InvalidTemplateException {
+        for (ITemplateLoader templateLoader : getRegisteredTemplateLoaders().values()) {
+            //noinspection unchecked
+            return (T) templateLoader.loadTemplate(name);
+        }
+        throw new InvalidTemplateException("No such template: " + name);
+    }
 
     /**
      * Return a template by name
@@ -107,47 +134,6 @@ public class TemplateManager {
     }
 
     /**
-     * Return a list of Template Versions along with their Json data
-     *
-     * @return map of names to paths
-     */
-    protected Map<String, Path> getTemplatePaths() {
-        Map<String, Path> result = new HashMap<>();
-
-        if (!myServer.getConfig().getFolderConfig().getTemplatePath().toFile().exists()) {
-            return result;
-        }
-
-        try (Stream<Path> walk = Files.walk(myServer.getConfig().getFolderConfig().getTemplatePath(), 10, FileVisitOption.FOLLOW_LINKS)) {
-            Path lastPath = null;
-            for (Path path : walk
-                    .filter(Files::isDirectory)
-                    .filter(p -> p.resolve("template.yml").toFile().exists())
-                    .collect(Collectors.toList())) {
-
-                // If a template.yml file is found in a directory then prune out all child directories
-                if (lastPath == null || !path.startsWith(lastPath)) {
-                    lastPath = path;
-                    try {
-                        JsonNode node = MAPPER.readTree(new FileInputStream(path.resolve("template.yml").toFile()));
-                        if (!node.has("name")) {
-                            throw new InvalidTemplateException("Failed to find a name field");
-                        }
-
-                        result.put(node.get("name").asText(), path);
-                    } catch (InvalidTemplateException | IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return result;
-    }
-
-    /**
      * Return a list of Templates
      *
      * @param typeClass Type of template
@@ -176,6 +162,13 @@ public class TemplateManager {
         return result;
     }
 
+    /**
+     * Register a new Template Type Class
+     *
+     * @param name          Name of the template type
+     * @param templateClass Class to load
+     * @return ourself to allow chaining
+     */
     @SuppressWarnings("UnusedReturnValue")
     public TemplateManager registerTemplateType(String name, Class<? extends ITemplate> templateClass) {
         registeredTemplateTypes.put(name, templateClass);
@@ -183,56 +176,67 @@ public class TemplateManager {
     }
 
     /**
-     * Load a template from a stream
+     * Register a new TemplateLoader
      *
-     * @param path Path of template
+     * @param name           Name of the template loader
+     * @param templateLoader the loader
+     * @return ourself to allow chaining
      */
-    public ITemplate loadTemplate(Path path) throws IOException, InvalidTemplateException {
-        JsonNode rootNode = MAPPER.readTree(path.resolve("template.yml").toFile());
+    public TemplateManager registerTemplateLoader(String name, ITemplateLoader templateLoader) {
+        registeredTemplateLoaders.put(name, templateLoader);
+        return this;
+    }
 
-        if (!rootNode.has("name")) {
-            throw new InvalidTemplateException("Failed to find a name field");
+    /**
+     * Load a template from a definition
+     *
+     * @param templateClass class of template
+     * @param definition    template definition
+     * @param <T>           type of template
+     * @return template
+     * @throws InvalidTemplateException any template errors
+     */
+    public <T extends ITemplate> T loadTemplate(Class<T> templateClass, ITemplateDefinition definition) throws InvalidTemplateException {
+        // Check if we already cache the loaded template and return that if so
+        ITemplate result = templateInstances.get(definition.getFullName());
+        if (result != null) {
+            //noinspection unchecked
+            return (T) result;
         }
 
-        String templateName = rootNode.get("name").asText();
-
-        // Check if we already have this template in use and return that instead
-        if (templateInstances.containsKey(templateName)) {
-            // TODO update instance with new data maybe
-            return templateInstances.get(templateName);
-        }
-
-        // Take away characters from the right of the version string till we match a templateType. This allows
-        // use to set a template version but also allow template designers to add their own version suffixes
-        String templateSubName = templateName;
-        while (templateSubName.length() > 0) {
-            if (registeredTemplateTypes.containsKey(templateSubName)) {
+        // Find a template type by taking off characters from the right till a match is found
+        String templateType = definition.getType();
+        Class<? extends ITemplate> templateTypeClass = null;
+        while (templateType.length() > 0) {
+            templateTypeClass = registeredTemplateTypes.get(templateType);
+            if (templateTypeClass != null) {
                 break;
             }
-            templateSubName = templateSubName.substring(0, templateSubName.length() - 1);
+            templateType = templateType.substring(0, templateType.length() - 1);
         }
-        if (!registeredTemplateTypes.containsKey(templateSubName)) {
-            throw new InvalidTemplateException("Unknown template name: " + templateName);
+
+        if (templateTypeClass == null) {
+            throw new InvalidTemplateException("Unknown template name: " + definition.getFullName());
         }
 
         // Make sure the template is not already locked
         // TODO perhaps a proper lock here instead to allow concurrency
-        if (templateLocks.contains(templateName)) {
-            throw new InvalidTemplateException("Template is locked. Do you have a parent loop?: " + templateName);
+        if (templateLocks.contains(definition.getFullName())) {
+            throw new InvalidTemplateException("Template is locked. Do you have a parent loop?: " + definition.getFullName());
         }
-        templateLocks.add(templateName);
+        templateLocks.add(definition.getFullName());
 
         try {
-            ITemplate result = registeredTemplateTypes.get(templateSubName)
-                    .getConstructor(TemplateManager.class, Path.class)
-                    .newInstance(this, path);
-            templateInstances.put(templateName, result);
-            return result;
+            result = templateTypeClass
+                    .getConstructor(TemplateManager.class, ITemplateDefinition.class)
+                    .newInstance(this, definition);
+            templateInstances.put(definition.getFullName(), result);
+            //noinspection unchecked
+            return (T) result;
         } catch (InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             throw new RuntimeException(e);
         } finally {
-            templateLocks.remove(templateName);
+            templateLocks.remove(definition.getFullName());
         }
     }
-
 }

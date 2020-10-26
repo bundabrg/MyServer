@@ -61,3 +61,33 @@ Template Example
 -------------------------
 
 name: My Template Name
+
+
+---
+
+TemplateLoader
+
+Template
+
+
+
+
+
+TemplateManager
+    - Register TemplateLoaders
+    - Register TemplateTypes
+
+    - listTypes
+    - listTemplateNames
+
+
+
+TemplateLoader
+    - findTemplatesByName(type, name); // Return list of template names that match
+    - getTemplate(type, name, version); // Return a concrete template, optionally exact version
+
+
+
+RepoLoader
+    - Update local index from remote. Any missing entries we keep if any linked templates else purge
+    
