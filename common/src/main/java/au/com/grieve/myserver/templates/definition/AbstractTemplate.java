@@ -25,6 +25,7 @@
 package au.com.grieve.myserver.templates.definition;
 
 import au.com.grieve.myserver.TemplateManager;
+import au.com.grieve.myserver.api.ITemplateDefinition;
 import au.com.grieve.myserver.exceptions.InvalidTemplateException;
 import au.com.grieve.myserver.exceptions.NoSuchTemplateException;
 import au.com.grieve.myserver.templates.Template;
@@ -32,7 +33,6 @@ import lombok.Getter;
 import lombok.ToString;
 
 import java.io.IOException;
-import java.nio.file.Path;
 
 /**
  * A template that simply contains a list of its config and is used to to inherit from
@@ -42,7 +42,7 @@ import java.nio.file.Path;
 public class AbstractTemplate extends Template {
 
 
-    public AbstractTemplate(TemplateManager templateManager, Path templatePath) throws NoSuchTemplateException, InvalidTemplateException, IOException {
-        super(templateManager, templatePath);
+    public AbstractTemplate(TemplateManager templateManager, ITemplateDefinition templateDefinition) throws NoSuchTemplateException, InvalidTemplateException, IOException {
+        super(templateManager, templateDefinition);
     }
 }

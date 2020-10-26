@@ -25,92 +25,48 @@
 package au.com.grieve.myserver.templates;
 
 import au.com.grieve.myserver.TemplateManager;
+import au.com.grieve.myserver.api.ITemplateDefinition;
 import au.com.grieve.myserver.api.templates.ITemplate;
 import au.com.grieve.myserver.exceptions.InvalidTemplateException;
-import au.com.grieve.myserver.exceptions.NoSuchTemplateException;
+import au.com.grieve.myserver.utils.JsonUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.Getter;
 import lombok.ToString;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 @Getter
 @ToString
 public abstract class Template implements ITemplate {
-    public static ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
+    protected static ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
 
     private final TemplateManager templateManager;
-    private final Path templatePath;
-    private final JsonNode node;
+    private final ITemplateDefinition templateDefinition;
+    private final Config config;
 
-    private final String type;
-    private final String name;
-    private final String version;
-
-    private final String description;
-    private final List<ITemplate> parents = new ArrayList<>();
-
-    public Template(TemplateManager templateManager, Path templatePath) throws NoSuchTemplateException, InvalidTemplateException, IOException {
+    public Template(TemplateManager templateManager, ITemplateDefinition templateDefinition) throws InvalidTemplateException {
         this.templateManager = templateManager;
-        this.templatePath = templatePath;
-        this.node = MAPPER.readTree(templatePath.resolve("template.yml").toFile());
+        this.templateDefinition = templateDefinition;
 
-        if (!node.has("name")) {
-            throw new InvalidTemplateException("Missing field: name");
-        }
+        // Load Parent data and merge them
+        JsonNode config = null;
+        if (templateDefinition.getConfig().has("parents")) {
+            for (JsonNode n : templateDefinition.getConfig().get("parents")) {
+                ITemplate parentTemplate = templateManager.loadTemplate(Template.class, n.asText());
 
-        Pattern p = Pattern.compile("([^:]+):([^@]+)@(.+)");
-        Matcher m = p.matcher(node.get("name").asText());
-        if (!m.find()) {
-            throw new InvalidTemplateException("Invalid name format: " + node.get("name"));
-        }
-        this.type = m.group(1);
-        this.name = m.group(2);
-        this.version = m.group(3);
-
-        this.description = node.has("description") ? node.get("description").asText() : "";
-        if (node.has("parents")) {
-            for (JsonNode n : node.get("parents")) {
-                ITemplate parentTemplate = templateManager.getTemplate(Template.class, n.asText());
-                this.parents.add(parentTemplate);
+                config = config != null ? JsonUtils.merge(config, parentTemplate.getConfig()) : parentTemplate.getConfig();
             }
         }
+
+        config = config != null ? JsonUtils.merge(config, templateDefinition.getConfig()) : templateDefinition.getConfig();
+        this.config = loadConfig(config);
     }
 
     /**
-     * Return a list of every node including those inherited
-     *
-     * @return list of all nodes
+     * Load Config
      */
-    @Override
-    public List<JsonNode> getAllNodes() {
-        return getAllNodes(new ArrayList<>());
-    }
+    protected abstract Config loadConfig(JsonNode config);
 
-    protected List<JsonNode> getAllNodes(List<JsonNode> current) {
-        List<JsonNode> result = new ArrayList<>();
-
-        // Short circuit any loops
-        if (current.contains(node)) {
-            return result;
-        }
-
-        result.add(node);
-        current.add(node);
-
-        for (ITemplate parent : parents) {
-            List<JsonNode> parentNodes = ((Template) parent).getAllNodes(current);
-            result.addAll(parentNodes);
-            current.addAll(parentNodes);
-        }
-
-        return result;
+    protected static abstract class Config {
     }
 }

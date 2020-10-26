@@ -25,6 +25,9 @@
 package au.com.grieve.myserver.api;
 
 import au.com.grieve.myserver.api.templates.ITemplate;
+import au.com.grieve.myserver.exceptions.InvalidTemplateException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.g00fy2.versioncompare.Version;
 
 /**
  * Definition for a template
@@ -54,12 +57,26 @@ public interface ITemplateDefinition {
      *
      * @return version portion of template full name
      */
-    String getVersion();
+    Version getVersion();
+
+    /**
+     * Return the template description
+     *
+     * @return template description
+     */
+    String getDescription();
+
+    /**
+     * Return the template config
+     *
+     * @return a JsonNode root of the config
+     */
+    JsonNode getConfig();
 
     /**
      * Load the template as a specific class
      *
      * @return loaded template
      */
-    <T extends ITemplate> T loadTemplate(Class<T> templateClass);
+    <T extends ITemplate> T loadTemplate(Class<T> templateClass) throws InvalidTemplateException;
 }

@@ -27,6 +27,7 @@ package au.com.grieve.myserver.platform.bungeecord;
 import au.com.grieve.myserver.MyServer;
 import au.com.grieve.myserver.ServerManager;
 import au.com.grieve.myserver.TemplateManager;
+import au.com.grieve.myserver.loaders.local.LocalTemplateLoader;
 import au.com.grieve.myserver.platform.bungeecord.config.BungeeConfig;
 import au.com.grieve.myserver.platform.bungeecord.templates.server.paper.BungeePaperTemplate;
 import au.com.grieve.myserver.platform.bungeecord.templates.server.spigot.BungeeSpigotTemplate;
@@ -44,6 +45,9 @@ public class BungeeMyServer extends MyServer {
         this.plugin = plugin;
         this.scheduler = new BungeeTaskScheduler(getPlugin(), getPlugin().getProxy().getScheduler());
 
+        // Register Builtin Template Loaders
+        registerBuiltinTemplateLoaders();
+
         // Register BuiltIn Template Types
         registerBuiltinTemplateTypes();
     }
@@ -54,6 +58,11 @@ public class BungeeMyServer extends MyServer {
                 .registerTemplateType("server/paper/1.0", BungeePaperTemplate.class)
                 .registerTemplateType("server/spigot/1.0", BungeeSpigotTemplate.class)
                 .registerTemplateType("server/vanilla/1.0", BungeeVanillaTemplate.class);
+    }
+
+    protected void registerBuiltinTemplateLoaders() {
+        getTemplateManager()
+                .registerTemplateLoader("local", new LocalTemplateLoader(getConfig().getFolderConfig().getTemplatePath()));
     }
 
     @Override

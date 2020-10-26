@@ -25,27 +25,13 @@
 package au.com.grieve.myserver.api.templates;
 
 import au.com.grieve.myserver.TemplateManager;
+import au.com.grieve.myserver.api.ITemplateDefinition;
 import com.fasterxml.jackson.databind.JsonNode;
 
-import java.nio.file.Path;
-import java.util.List;
-
 public interface ITemplate {
-    List<JsonNode> getAllNodes();
-
     TemplateManager getTemplateManager();
 
-    Path getTemplatePath();
+    ITemplateDefinition getTemplateDefinition();
 
-    JsonNode getNode();
-
-    String getName();
-
-    String getType();
-
-    String getVersion();
-
-    String getDescription();
-
-    List<ITemplate> getParents();
+    JsonNode getConfig();
 }

@@ -22,17 +22,34 @@
  * SOFTWARE.
  */
 
-package au.com.grieve.myserver.api;
+package au.com.grieve.myserver.utils;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
-@AllArgsConstructor
-public enum TypeEnum {
-    NULL(""),
-    INT("int"),
-    STRING("string"),
-    BOOLEAN("boolean"),
-    CHOICE("choice");
+import java.util.Iterator;
 
-    String name;
+public class JsonUtils {
+    public static JsonNode merge(JsonNode mainNode, JsonNode updateNode) {
+
+        Iterator<String> fieldNames = updateNode.fieldNames();
+        while (fieldNames.hasNext()) {
+
+            String fieldName = fieldNames.next();
+            JsonNode jsonNode = mainNode.get(fieldName);
+            // if field exists and is an embedded object
+            if (jsonNode != null && jsonNode.isObject()) {
+                merge(jsonNode, updateNode.get(fieldName));
+            } else {
+                if (mainNode instanceof ObjectNode) {
+                    // Overwrite field
+                    JsonNode value = updateNode.get(fieldName);
+                    ((ObjectNode) mainNode).replace(fieldName, value);
+                }
+            }
+
+        }
+
+        return mainNode;
+    }
 }

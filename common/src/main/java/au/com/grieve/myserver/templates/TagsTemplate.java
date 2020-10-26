@@ -25,12 +25,16 @@
 package au.com.grieve.myserver.templates;
 
 import au.com.grieve.myserver.TemplateManager;
+import au.com.grieve.myserver.api.ITemplateDefinition;
 import au.com.grieve.myserver.api.TagDefinition;
 import au.com.grieve.myserver.api.TypeEnum;
 import au.com.grieve.myserver.api.templates.ITagsTemplate;
 import au.com.grieve.myserver.exceptions.InvalidTemplateException;
 import au.com.grieve.myserver.exceptions.NoSuchTemplateException;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.JsonNode;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -42,6 +46,50 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+public enum TagType {
+    INT,
+    STRING,
+    BOOLEAN;
+
+
+    @JsonValue
+    public String getName() {
+        return name().toLowerCase();
+    }
+}
+
+@Data
+@EqualsAndHashCode(callSuper = true)
+protected static class Config extends Template.Config {
+    Tags tags;
+}
+
+@Data
+protected static class Tags {
+    Map<String, Tag> tags = new HashMap<>();
+}
+
+@Data
+protected static class Tag {
+    // Description of the Tag
+    String description = "";
+
+    // If true the tag requires a value
+    Boolean required = false;
+
+    // Default value if none set
+    String defaultValue;
+
+    // Type of value
+    TagType type;
+
+    // Permission to use tag
+    String permission;
+
+    // Choices available for value with descriptions
+    Map<String, String> choices;
+}
+
 /**
  * A Template that contains tags and template files
  */
@@ -50,49 +98,63 @@ public class TagsTemplate extends Template implements ITagsTemplate {
     private final Map<String, TagDefinition> tags = new HashMap<>();
     private final Map<TemplateFileEnum, List<Path>> templateFiles = new HashMap<>();
 
-    public TagsTemplate(TemplateManager templateManager, Path templatePath) throws NoSuchTemplateException, InvalidTemplateException, IOException {
-        super(templateManager, templatePath);
-
-        for (JsonNode n : getAllNodes()) {
-            if (n.has("tags")) {
-                for (Iterator<Map.Entry<String, JsonNode>> it = n.get("tags").fields(); it.hasNext(); ) {
-                    Map.Entry<String, JsonNode> entry = it.next();
-                    JsonNode node = entry.getValue();
-                    tags.putIfAbsent(entry.getKey(), TagDefinition.builder()
-                            .name(entry.getKey())
-                            .type(node.has("type") ? TypeEnum.valueOf(node.get("type").asText().toUpperCase()) : TypeEnum.STRING)
-                            .description(node.has("description") ? node.get("description").asText() : null)
-                            .defaultValue(node.has("default") ? node.get("default").asText() : null)
-                            .permission(node.has("permission") ? node.get("permission").asText() : null)
-                            .required(node.has("required") && node.get("required").asBoolean())
-                            .build());
-                }
-            }
-
-            if (n.has("templates")) {
-                for (Iterator<Map.Entry<String, JsonNode>> it = n.get("templates").fields(); it.hasNext(); ) {
-                    Map.Entry<String, JsonNode> entry = it.next();
-                    JsonNode node = entry.getValue();
-                    TemplateFileEnum templateFileType;
-                    try {
-                        templateFileType = TemplateFileEnum.valueOf(entry.getKey().toUpperCase());
-                    } catch (IllegalArgumentException e) {
-                        throw new InvalidTemplateException("Illegal Template Type: " + entry.getKey(), e);
-                    }
-                    if (!node.isArray()) {
-                        throw new InvalidTemplateException("Error in template file. Template list should be an array: " + node);
-                    }
-
-                    if (!templateFiles.containsKey(templateFileType)) {
-                        templateFiles.put(templateFileType, new ArrayList<>());
-                    }
-                    for (JsonNode templateName : node) {
-                        templateFiles.get(templateFileType).add(Paths.get(templateName.asText()));
-                    }
-                }
-            }
+    {
+        for (Iterator<Map.Entry<String, JsonNode>> it = getConfig().get("tags").fields(); it.hasNext(); ) {
+            Map.Entry<String, JsonNode> entry = it.next();
+            JsonNode node = entry.getValue();
+            tags.put(entry.getKey(), TagDefinition.builder()
+                    .name(entry.getKey())
+                    .type(node.has("type") ? TypeEnum.valueOf(node.get("type").asText().toUpperCase()) : TypeEnum.STRING)
+                    .description(node.has("description") ? node.get("description").asText() : null)
+                    .defaultValue(node.has("default") ? node.get("default").asText() : null)
+                    .permission(node.has("permission") ? node.get("permission").asText() : null)
+                    .required(node.has("required") && node.get("required").asBoolean())
+                    .build());
         }
     }
+
+    {
+        for (Iterator<Map.Entry<String, JsonNode>> it = getConfig().get("templates").fields(); it.hasNext(); ) {
+            Map.Entry<String, JsonNode> entry = it.next();
+            JsonNode node = entry.getValue();
+            TemplateFileEnum templateFileType;
+            try {
+                templateFileType = TemplateFileEnum.valueOf(entry.getKey().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new InvalidTemplateException("Illegal Template Type: " + entry.getKey(), e);
+            }
+            if (!node.isArray()) {
+                throw new InvalidTemplateException("Error in template file. Template list should be an array: " + node);
+            }
+
+            if (!templateFiles.containsKey(templateFileType)) {
+                templateFiles.put(templateFileType, new ArrayList<>());
+            }
+            for (JsonNode templateName : node) {
+                templateFiles.get(templateFileType).add(Paths.get(templateName.asText()));
+            }
+        }
+    }if(
+
+    public TagsTemplate(TemplateManager templateManager, ITemplateDefinition templateDefinition) throws NoSuchTemplateException, InvalidTemplateException, IOException {
+        super(templateManager, templateDefinition);
+    }.
+
+    getConfig())
+
+    has("tags")
+
+        if(
+
+    getConfig().
+
+    has("templates"))
+
+    @Override
+    protected Config loadConfig(JsonNode config) {
+        return null;
+    }
+}
 
 
 }

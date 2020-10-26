@@ -26,11 +26,17 @@ package au.com.grieve.myserver.loaders.local;
 
 import au.com.grieve.myserver.api.ITemplateDefinition;
 import au.com.grieve.myserver.api.ITemplateLoader;
-import au.com.grieve.myserver.api.templates.ITemplate;
+import au.com.grieve.myserver.exceptions.InvalidTemplateException;
 import lombok.Getter;
 
+import java.io.IOException;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Getter
 public class LocalTemplateLoader implements ITemplateLoader {
@@ -44,13 +50,13 @@ public class LocalTemplateLoader implements ITemplateLoader {
 
     @Override
     public List<ITemplateDefinition> findTemplatesByName(String search) {
-        Map<String, Path> result = new HashMap<>();
+        List<ITemplateDefinition> result = new ArrayList<>();
 
-        if (!myServer.getConfig().getFolderConfig().getTemplatePath().toFile().exists()) {
+        if (!Files.exists(getTemplatePath())) {
             return result;
         }
 
-        try (Stream<Path> walk = Files.walk(myServer.getConfig().getFolderConfig().getTemplatePath(), 10, FileVisitOption.FOLLOW_LINKS)) {
+        try (Stream<Path> walk = Files.walk(getTemplatePath(), 10, FileVisitOption.FOLLOW_LINKS)) {
             Path lastPath = null;
             for (Path path : walk
                     .filter(Files::isDirectory)
@@ -61,27 +67,19 @@ public class LocalTemplateLoader implements ITemplateLoader {
                 if (lastPath == null || !path.startsWith(lastPath)) {
                     lastPath = path;
                     try {
-                        JsonNode node = MAPPER.readTree(new FileInputStream(path.resolve("template.yml").toFile()));
-                        if (!node.has("name")) {
-                            throw new InvalidTemplateException("Failed to find a name field");
-                        }
-
-                        result.put(node.get("name").asText(), path);
-                    } catch (InvalidTemplateException | IOException e) {
+                        result.add(new LocalTemplateDefinition(this, path));
+                    } catch (InvalidTemplateException e) {
+                        // Print a stacktrace and ignore
                         e.printStackTrace();
                     }
                 }
             }
         } catch (IOException e) {
+            // Print stacktrack and ignore
             e.printStackTrace();
         }
 
         return result;
 
-    }
-
-    @Override
-    public ITemplate loadTemplate(String name) {
-        return null;
     }
 }

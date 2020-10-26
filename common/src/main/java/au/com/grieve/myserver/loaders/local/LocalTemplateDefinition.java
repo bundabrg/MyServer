@@ -31,6 +31,7 @@ import au.com.grieve.myserver.exceptions.InvalidTemplateException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.g00fy2.versioncompare.Version;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -50,7 +51,9 @@ public class LocalTemplateDefinition implements ITemplateDefinition {
     private final String fullName;
     private final String type;
     private final String name;
-    private final String version;
+    private final Version version;
+
+    private final String description;
 
     public LocalTemplateDefinition(LocalTemplateLoader templateLoader, Path templatePath) throws IOException, InvalidTemplateException {
         this.templatePath = templatePath;
@@ -68,11 +71,23 @@ public class LocalTemplateDefinition implements ITemplateDefinition {
 
         type = matcher.group(1);
         name = matcher.group(2);
-        version = matcher.group(3);
+        version = new Version(matcher.group(3));
+
+        description = rootNode.has("description") ? rootNode.get("description").asText() : "";
     }
 
     @Override
-    public <T extends ITemplate> T loadTemplate(Class<T> templateClass) {
+    public String getDescription() {
+        return null;
+    }
+
+    @Override
+    public JsonNode getConfig() {
+        return rootNode;
+    }
+
+    @Override
+    public <T extends ITemplate> T loadTemplate(Class<T> templateClass) throws InvalidTemplateException {
         return TemplateManager.INSTANCE.loadTemplate(templateClass, this);
     }
 }

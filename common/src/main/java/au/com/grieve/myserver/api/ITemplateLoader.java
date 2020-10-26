@@ -24,8 +24,6 @@
 
 package au.com.grieve.myserver.api;
 
-import au.com.grieve.myserver.api.templates.ITemplate;
-
 import java.util.List;
 
 public interface ITemplateLoader {
@@ -33,10 +31,4 @@ public interface ITemplateLoader {
      * Return list of unloaded templates that match the partial template fullname
      */
     List<ITemplateDefinition> findTemplatesByName(String search);
-
-    /**
-     * Load an unloaded template
-     */
-    ITemplate loadTemplate(ITemplateDefinition unloadedTemplate);
-
 }

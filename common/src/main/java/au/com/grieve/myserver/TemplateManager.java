@@ -28,15 +28,12 @@ import au.com.grieve.myserver.api.ITemplateDefinition;
 import au.com.grieve.myserver.api.ITemplateLoader;
 import au.com.grieve.myserver.api.templates.ITemplate;
 import au.com.grieve.myserver.exceptions.InvalidTemplateException;
-import au.com.grieve.myserver.exceptions.NoSuchTemplateException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.MapMaker;
 import lombok.Getter;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -75,10 +72,10 @@ public class TemplateManager {
     }
 
     /**
-     * Return list of unloaded templates that match the partial name
+     * Return list of template definitions that match the partial name
      *
      * @param name Partial name of template in form type:name@version
-     * @return list of matching unloaded templates
+     * @return list of matching definitions
      */
     public List<ITemplateDefinition> findTemplatesByName(String name) {
         List<ITemplateDefinition> result = new ArrayList<>();
@@ -88,78 +85,23 @@ public class TemplateManager {
         return result;
     }
 
+    /**
+     * Load a template by name
+     * <p>
+     * If multiple templates are resolved then load the latest version
+     *
+     * @param templateClass class of template
+     * @param name          template name in the form type:name@version
+     * @param <T>           class of template
+     * @return template
+     * @throws InvalidTemplateException for template errors
+     */
     public <T extends ITemplate> T loadTemplate(Class<T> templateClass, String name) throws InvalidTemplateException {
-        for (ITemplateLoader templateLoader : getRegisteredTemplateLoaders().values()) {
-            //noinspection unchecked
-            return (T) templateLoader.loadTemplate(name);
-        }
-        throw new InvalidTemplateException("No such template: " + name);
-    }
-
-    /**
-     * Return a template by name
-     * <p>
-     * The name is in the format:  type:name@version
-     * <p>
-     * The version can be left off to return the latest version
-     *
-     * @param typeClass Type of template
-     * @param name      Name of the template
-     * @param <T>       Type of template
-     * @return the returned template else null
-     */
-    public <T extends ITemplate> T getTemplate(Class<T> typeClass, String name) throws NoSuchTemplateException, InvalidTemplateException, IOException {
-        // Check if we already have an instance in use
-        if (templateInstances.containsKey(name)) {
-            //noinspection unchecked
-            return (T) templateInstances.get(name);
-        }
-
-        // Look for matching template
-        Path templatePath = getTemplatePaths().get(name);
-
-        if (templatePath == null) {
-            throw new NoSuchTemplateException("No such template: " + name);
-        }
-
-        // Load the template
-        ITemplate template = loadTemplate(templatePath);
-
-        if (!typeClass.isAssignableFrom(template.getClass())) {
-            throw new InvalidTemplateException("Template '" + name + "' is not of type '" + typeClass);
-        }
-
         //noinspection unchecked
-        return (T) template;
-    }
-
-    /**
-     * Return a list of Templates
-     *
-     * @param typeClass Type of template
-     * @param <T>       Type of Template
-     * @return Array of Templates
-     */
-    public <T extends ITemplate> List<T> getTemplates(Class<T> typeClass) {
-        List<T> result = new ArrayList<>();
-
-        for (Map.Entry<String, Path> entry : getTemplatePaths().entrySet()) {
-            ITemplate template;
-            try {
-                template = loadTemplate(entry.getValue());
-            } catch (IOException | InvalidTemplateException e) {
-                e.printStackTrace();
-                continue;
-            }
-
-            if (!(typeClass.isAssignableFrom(template.getClass()))) {
-                continue;
-            }
-
-            //noinspection unchecked
-            result.add((T) template);
-        }
-        return result;
+        return (T) findTemplatesByName(name).stream()
+                .sorted()
+                .findFirst()
+                .orElseThrow(() -> new InvalidTemplateException("No such template: " + name));
     }
 
     /**

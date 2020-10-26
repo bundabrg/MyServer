@@ -25,6 +25,7 @@
 package au.com.grieve.myserver.templates.server;
 
 import au.com.grieve.myserver.TemplateManager;
+import au.com.grieve.myserver.api.ITemplateDefinition;
 import au.com.grieve.myserver.api.ServerStatus;
 import au.com.grieve.myserver.api.templates.server.IServerTemplate;
 import au.com.grieve.myserver.exceptions.InvalidServerException;
@@ -60,9 +61,18 @@ public abstract class ServerTemplate extends TagsTemplate implements IServerTemp
      *
      * @param templatePath template path
      */
-    public ServerTemplate(TemplateManager templateManager, Path templatePath) throws NoSuchTemplateException, InvalidTemplateException, IOException {
-        super(templateManager, templatePath);
+    public ServerTemplate(TemplateManager templateManager, ITemplateDefinition templateDefinition) throws NoSuchTemplateException, InvalidTemplateException, IOException {
+        super(templateManager, templateDefinition);
 
+        JsonNode serverNode = getConfig().get("server");
+        if (serverNode.isObject()) {
+            JsonNode serverStartNode = serverNode.get("start");
+            if (serverStartNode.isObject()) {
+                serverStartExecute = serverStartNode.get("execute").asText("");
+                serverStartCommands = serverStartNode.get("commands").el
+            }
+
+        }
 
         String serverStartExecute = null;
         boolean foundServerStartCommands = false;
