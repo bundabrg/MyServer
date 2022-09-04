@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 MyServer Developers
+ * Copyright (c) 2022 MyServer Developers
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,19 +24,6 @@
 
 package au.com.grieve.myserver.api.templates;
 
-import au.com.grieve.myserver.api.TagDefinition;
-
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-
 public interface ITagsTemplate extends ITemplate {
-    Map<String, TagDefinition> getTags();
-
-    Map<TemplateFileEnum, List<Path>> getTemplateFiles();
-
-    enum TemplateFileEnum {
-        STATIC,
-        DYNAMIC
-    }
+    TagsTemplateConfig getConfig();
 }

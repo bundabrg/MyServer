@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 MyServer Developers
+ * Copyright (c) 2022 MyServer Developers
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -67,11 +67,11 @@ public interface ITemplateDefinition {
     String getDescription();
 
     /**
-     * Return the template config
+     * Return the template data
      *
      * @return a JsonNode root of the config
      */
-    JsonNode getConfig();
+    JsonNode getData();
 
     /**
      * Load the template as a specific class

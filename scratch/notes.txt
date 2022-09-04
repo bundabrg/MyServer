@@ -1,93 +1,10 @@
-/ms create name [template] - Create a server.
-    Server name created. To join type /ms join <name>
-/ms list - List all servers I have access to
-/ms join <name> - Join a server I have access to
+MyServer - Manager
+    - Runs on each node
+    - [future] Has a parent manager if slave, otherwise it is a master
+    - [future] Slave just passes info to parent and can itself have its own slaves that it proxies
+    
+    - PLugins on servers communicate with manager
+    - Manager can stop/start child services using docker perhaps or maybe directly executing them
 
-/ms destroy <name> - Delete a server
-/ms grant <name> <username> - Grant username access to server. * means all users,
-/ms revoke <name> <username> - Revoke username access to server
-
-
---- admin ---
-/msa - Open Webview
-/msa create server-name template-name - Create a server using the named template
-
-/msa template list - List all templates I have access to
-/msa template info <name> - Provides more details about template
-
-/msa server list - List all servers I have access to
-/msa server info <name> - Provides more details about the server
-/msa server edit <name>
-
-
-/msa reload - Reload Config files
-
-/msa tag <name> set <variable> [<value>]
-    tag global set <variable> [<value>] - Set global variable
-
-/msa auto <name> start <on_start_condition> [data]
-                stop <on_stop_condition> [data]
-/msa start <name>
-/msa stop <name>
-/msa cmd <name> <cmd>
-/msa info <name>
-/msa rename <name> <new-name>
-
-
-
-Templates contain:
-    * Permissioned items for Admins, Owners and perhaps Moderators
-    * Tags
-    * Server Type
-
--------------------
-server type:
-    paper
-    tuinity
-    spigot
-    vanilla
-
-Each type has its own configuration options and could download the correct type for the template
-
-
-Entities:
-    * Templates
-    * Template Types
-    * Instance
-    * Permission Group
-
--------------------------
-Template Example
--------------------------
-
-name: My Template Name
-
-
----
-
-TemplateLoader
-
-Template
-
-
-
-
-
-TemplateManager
-    - Register TemplateLoaders
-    - Register TemplateTypes
-
-    - listTypes
-    - listTemplateNames
-
-
-
-TemplateLoader
-    - findTemplatesByName(type, name); // Return list of template names that match
-    - getTemplate(type, name, version); // Return a concrete template, optionally exact version
-
-
-
-RepoLoader
-    - Update local index from remote. Any missing entries we keep if any linked templates else purge
+    
     

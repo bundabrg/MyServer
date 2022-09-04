@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 MyServer Developers
+ * Copyright (c) 2022 MyServer Developers
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,7 @@ import au.com.grieve.myserver.api.ITemplateDefinition;
 import au.com.grieve.myserver.api.templates.ITemplate;
 import au.com.grieve.myserver.exceptions.InvalidTemplateException;
 import au.com.grieve.myserver.utils.JsonUtils;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -38,35 +39,28 @@ import lombok.ToString;
 @Getter
 @ToString
 public abstract class Template implements ITemplate {
-    protected static ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
+    protected static ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory())
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     private final TemplateManager templateManager;
     private final ITemplateDefinition templateDefinition;
-    private final Config config;
+    private final JsonNode data;
 
     public Template(TemplateManager templateManager, ITemplateDefinition templateDefinition) throws InvalidTemplateException {
         this.templateManager = templateManager;
         this.templateDefinition = templateDefinition;
 
         // Load Parent data and merge them
-        JsonNode config = null;
-        if (templateDefinition.getConfig().has("parents")) {
-            for (JsonNode n : templateDefinition.getConfig().get("parents")) {
+        JsonNode data = null;
+        if (templateDefinition.getData().has("parents")) {
+            for (JsonNode n : templateDefinition.getData().get("parents")) {
                 ITemplate parentTemplate = templateManager.loadTemplate(Template.class, n.asText());
 
-                config = config != null ? JsonUtils.merge(config, parentTemplate.getConfig()) : parentTemplate.getConfig();
+                data = data != null ? JsonUtils.merge(data, parentTemplate.getData()) : parentTemplate.getData();
             }
         }
 
-        config = config != null ? JsonUtils.merge(config, templateDefinition.getConfig()) : templateDefinition.getConfig();
-        this.config = loadConfig(config);
+        this.data = data != null ? JsonUtils.merge(data, templateDefinition.getData()) : templateDefinition.getData();
     }
 
-    /**
-     * Load Config
-     */
-    protected abstract Config loadConfig(JsonNode config);
-
-    protected static abstract class Config {
-    }
 }

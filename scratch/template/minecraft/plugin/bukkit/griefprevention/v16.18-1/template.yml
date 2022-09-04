@@ -1,0 +1,14 @@
+# Template Description
+description: GriefPrevention - The self-service anti-griefing Bukkit plugin for Minecraft servers since 2011
+
+# What template(s) we extend
+extends:
+  - minecraft/plugin/bukkit/griefprevention/v16.17-1
+
+# Plugin specific settings
+plugin:
+  # Where to find original source
+  sourceUrl: https://github.com/TechFortress/GriefPrevention
+
+  # Where to download the package
+  downloadUrl: https://github.com/TechFortress/GriefPrevention/releases/download/16.18/GriefPrevention.jar
