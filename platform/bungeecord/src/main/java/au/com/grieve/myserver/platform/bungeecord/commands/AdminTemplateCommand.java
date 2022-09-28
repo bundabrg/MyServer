@@ -24,8 +24,9 @@
 
 package au.com.grieve.myserver.platform.bungeecord.commands;
 
-import au.com.grieve.bcf.annotations.Arg;
-import au.com.grieve.bcf.annotations.Command;
+import au.com.grieve.bcf.annotation.Arg;
+import au.com.grieve.bcf.annotation.Command;
+import au.com.grieve.bcf.platform.bungeecord.impl.command.BungeecordAnnotationCommand;
 import au.com.grieve.myserver.platform.bungeecord.MyServerPlugin;
 import au.com.grieve.myserver.platform.bungeecord.api.templates.IBungeeTemplate;
 import net.md_5.bungee.api.ChatColor;
@@ -34,10 +35,10 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 
 import java.util.List;
 
-@Command("msat")
+@Command(value="msat", input="template")
 @Arg("template|t")
 //@Permission("myserver.*")
-public class AdminTemplateCommand extends AdminCommand {
+public class AdminTemplateCommand extends BungeecordAnnotationCommand {
 
     @Arg("help")
     public void onHelp(CommandSender sender) {
@@ -62,12 +63,12 @@ public class AdminTemplateCommand extends AdminCommand {
             cb.append("\nNone Found").color(ChatColor.YELLOW);
         }
 
-        sendMessage(sender, cb.create());
+        sender.sendMessage( cb.create());
     }
 
     @Arg("info @MSTemplate(filter=server)")
     public void onTemplateInfo(CommandSender sender, IBungeeTemplate template) {
-        sendMessage(sender, template.bungeeGetInfo());
+        sender.sendMessage( template.bungeeGetInfo());
     }
 
 }

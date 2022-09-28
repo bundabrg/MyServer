@@ -1,84 +1,108 @@
 /*
- * MIT License
+ * Copyright (c) 2020-2022 Brendan Grieve (bundabrg) - MIT License
  *
- * Copyright (c) 2020 MyServer Developers
+ *  Permission is hereby granted, free of charge, to any person obtaining
+ *  a copy of this software and associated documentation files (the
+ *  "Software"), to deal in the Software without restriction, including
+ *  without limitation the rights to use, copy, modify, merge, publish,
+ *  distribute, sublicense, and/or sell copies of the Software, and to
+ *  permit persons to whom the Software is furnished to do so, subject to
+ *  the following conditions:
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ *  The above copyright notice and this permission notice shall be
+ *  included in all copies or substantial portions of the Software.
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ *   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ *  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ *  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ *  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ *  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ *  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ *  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package au.com.grieve.myserver.platform.bungeecord.parsers;
 
-import au.com.grieve.bcf.ArgNode;
-import au.com.grieve.bcf.CommandContext;
-import au.com.grieve.bcf.CommandManager;
-import au.com.grieve.bcf.Parser;
-import au.com.grieve.bcf.exceptions.ParserInvalidResultException;
-import au.com.grieve.bcf.parsers.SingleParser;
+import au.com.grieve.bcf.CompletionCandidateGroup;
+import au.com.grieve.bcf.ParsedLine;
+import au.com.grieve.bcf.ParserContext;
+import au.com.grieve.bcf.exception.EndOfLineException;
+import au.com.grieve.bcf.exception.ParserSyntaxException;
+import au.com.grieve.bcf.impl.completion.DefaultCompletionCandidate;
+import au.com.grieve.bcf.impl.completion.StaticCompletionCandidateGroup;
+import au.com.grieve.bcf.impl.error.UnexpectedInputError;
+import au.com.grieve.bcf.impl.parser.BaseParser;
 import au.com.grieve.myserver.api.TagDefinition;
 import au.com.grieve.myserver.api.templates.server.IServer;
-import com.google.common.collect.Lists;
-
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.Getter;
+import lombok.ToString;
+import net.md_5.bungee.api.CommandSender;
 
-/**
- * MyServer Tag
- * <p>
- * Relies on a MSServer previously being set so we know what tags are available
- * <p>
- * Returns a TagDefinition
- */
-public class MSTagDefinition extends SingleParser {
+@Getter
+@ToString(callSuper = true)
+public class MSTagDefinition extends BaseParser<CommandSender, TagDefinition> {
 
-    public MSTagDefinition(CommandManager manager, ArgNode argNode, CommandContext context) {
-        super(manager, argNode, context);
+  public MSTagDefinition(Map<String, String> parameters) {
+    super(parameters);
+  }
+
+  public MSTagDefinition(String description, String defaultValue, boolean suppress,
+      boolean required,
+      String placeholder, List<String> switchValue) {
+    super(description, defaultValue, suppress, required, placeholder, switchValue);
+  }
+
+  protected IServer getServer(ParserContext<CommandSender> context) {
+    return context.getHistory().allObjects().stream()
+        .collect(
+            Collectors.collectingAndThen(
+                Collectors.toList(),
+                l -> {
+                  Collections.reverse(l);
+                  return l;
+                }))
+        .stream()
+        .filter(o -> o instanceof IServer)
+        .map(o -> ((IServer) o))
+        .findFirst()
+        .orElse(null);
+  }
+
+  @Override
+  protected TagDefinition doParse(ParserContext<CommandSender> context, ParsedLine line)
+      throws EndOfLineException, ParserSyntaxException {
+
+    String input = line.next();
+
+    IServer server = getServer(context);
+    if (server != null) {
+      if (server.getTemplate().getTags().containsKey(input)) {
+        return server.getTemplate().getTags().get(input);
+      }
     }
+    throw new ParserSyntaxException(line, new UnexpectedInputError()); //TODO
+  }
 
-    protected IServer getServer() throws ParserInvalidResultException {
-        for (Parser parser : Lists.reverse(context.getParsers())) {
-            if (parser instanceof MSServer) {
-                return ((MSServer) parser).result();
-            }
-        }
-        throw new ParserInvalidResultException(this, "Unknown Server");
-    }
+  @Override
+  protected void doComplete(ParserContext<CommandSender> context, ParsedLine line,
+      List<CompletionCandidateGroup> candidates)
+      throws EndOfLineException {
+    String input = line.next();
 
-    @Override
-    protected TagDefinition result() throws ParserInvalidResultException {
-        IServer server = getServer();
-        if (server.getTemplate().getTags().containsKey(getInput())) {
-            return server.getTemplate().getTags().get(getInput());
-        }
-        throw new ParserInvalidResultException(this, "Invalid Tag");
+    IServer server = getServer(context);
+    if (server != null) {
+      CompletionCandidateGroup group = new StaticCompletionCandidateGroup(input, getDescription());
+      group.getCompletionCandidates()
+          .addAll(server.getTemplate().getTags().keySet().stream()
+              .filter(s -> s.startsWith(input))
+              .limit(20)
+              .map(DefaultCompletionCandidate::new)
+              .collect(Collectors.toList()));
+      candidates.add(group);
     }
-
-    @Override
-    protected List<String> complete() {
-        try {
-            IServer server = getServer();
-            return server.getTemplate().getTags().keySet().stream()
-                    .filter(s -> s.startsWith(getInput()))
-                    .limit(20)
-                    .collect(Collectors.toList());
-        } catch (ParserInvalidResultException e) {
-            return Collections.emptyList();
-        }
-    }
+  }
 }

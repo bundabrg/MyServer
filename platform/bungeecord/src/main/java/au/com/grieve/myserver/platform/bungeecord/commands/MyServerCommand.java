@@ -24,16 +24,16 @@
 
 package au.com.grieve.myserver.platform.bungeecord.commands;
 
-import au.com.grieve.bcf.annotations.Arg;
-import au.com.grieve.bcf.annotations.Command;
-import au.com.grieve.bcf.platform.bungeecord.BungeeCommand;
+import au.com.grieve.bcf.annotation.Arg;
+import au.com.grieve.bcf.annotation.Command;
+import au.com.grieve.bcf.platform.bungeecord.impl.command.BungeecordAnnotationCommand;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 
 @Command("myserver|ms")
 //@Permission("myserver.*")
-public class MyServerCommand extends BungeeCommand {
+public class MyServerCommand extends BungeecordAnnotationCommand {
 
 //    @Arg("reload")
 //    @Permission("portalnetwork.admin")

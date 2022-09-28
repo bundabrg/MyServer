@@ -24,7 +24,7 @@
 
 package au.com.grieve.myserver.platform.bungeecord;
 
-import au.com.grieve.bcf.platform.bungeecord.BungeeCommandManager;
+import au.com.grieve.bcf.platform.bungeecord.impl.BungeecordCommandManager;
 import au.com.grieve.myserver.platform.bungeecord.commands.AdminCommand;
 import au.com.grieve.myserver.platform.bungeecord.commands.AdminServerCommand;
 import au.com.grieve.myserver.platform.bungeecord.commands.AdminTemplateCommand;
@@ -49,9 +49,9 @@ import java.util.logging.Level;
 public class MyServerPlugin extends Plugin {
     public static MyServerPlugin INSTANCE;
 
-    private BungeeCommandManager bcf;
-    private BungeeMyServer myServer;
-    private BungeeConfig config;
+  private BungeecordCommandManager bcf;
+  private BungeeMyServer myServer;
+  private BungeeConfig config;
 
     @Override
     public void onEnable() {
@@ -62,19 +62,19 @@ public class MyServerPlugin extends Plugin {
         // Load Config
         config = loadConfiguration();
 
-        bcf = new BungeeCommandManager(this);
-
-        // Register Commands
-        bcf.registerCommand(MyServerCommand.class);
-        bcf.registerCommand(AdminCommand.class);
-        bcf.registerCommand(AdminServerCommand.class);
-        bcf.registerCommand(AdminTemplateCommand.class);
+        bcf = new BungeecordCommandManager(this);
 
         // Register Parsers
         bcf.registerParser("MSTemplate", MSTemplate.class);
         bcf.registerParser("MSServer", MSServer.class);
         bcf.registerParser("MSTagDefinition", MSTagDefinition.class);
         bcf.registerParser("MSTagValue", MSTagValue.class);
+
+        // Register Commands
+        bcf.registerCommand(new MyServerCommand());
+        bcf.registerCommand(new AdminCommand());
+        bcf.registerCommand(AdminCommand.class, new AdminServerCommand());
+        bcf.registerCommand(AdminCommand.class, new AdminTemplateCommand());
 
         // Register Server Manager
         myServer = new BungeeMyServer(config, this);
